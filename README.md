@@ -1,6 +1,6 @@
 # 👋🧩 Morphe Patches template
 
-Template repository for Morphe Patches.
+WIP Don't download.
 
 ## ❓ About
 
