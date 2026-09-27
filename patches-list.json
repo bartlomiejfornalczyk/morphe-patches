@@ -1,10 +1,10 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.2.0",
+  "version": "1.0.0",
   "patches": [
     {
       "name": "Allow Morphe YouTube Music mini player",
-      "description": "Allows modded YouTube Music (app.morphe.android.apps.youtube.music) as the navigation mini player.",
+      "description": "Enables YouTube Music and modded media apps as the navigation mini player.",
       "default": true,
       "category": null,
       "dependencies": [
@@ -43,7 +43,7 @@
     },
     {
       "name": "Allow Morphe YouTube Music package visibility",
-      "description": "Adds Morphe YouTube Music to queries in AndroidManifest.xml for Android 11+ visibility.",
+      "description": "Adds package queries and permission to AndroidManifest.xml for full media apps visibility.",
       "default": true,
       "category": null,
       "dependencies": [],
