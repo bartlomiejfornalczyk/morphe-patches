@@ -1,14 +1,13 @@
-group = "app.template"
+group = "com.bartlomiejfornalczyk.patches"
 
 patches {
-    // TODO: Update this section with your project details.
     about {
-        name = "UserXYZ Patches"
-        description = "Patches for apps I like"
-        source = "git@github.com:UserXYZ/morphe-patches.git"
-        author = "Awesome dev"
+        name = "Google Maps Morphe Patches"
+        description = "Custom patches for Google Maps navigation media player"
+        source = "https://github.com/bartlomiejfornalczyk/morphe-patches.git"
+        author = "Bartlomiej Fornalczyk"
         contact = "na"
-        website = "na"
+        website = "https://github.com/bartlomiejfornalczyk/morphe-patches"
         license = "GPLv3"
     }
 }
