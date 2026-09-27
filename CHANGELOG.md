@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0...v1.2.0) (2026-09-27)
+
+### ✨ New Features
+
+* **maps:** force phenotype media feature flag to true and allow apkm bundles ([73ceb0f](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/73ceb0fa368eb8fb47a976f631b49e91186c8aaf))
+
 ## [1.1.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.0.0...v1.1.0) (2026-09-27)
 
 ### ✨ New Features
