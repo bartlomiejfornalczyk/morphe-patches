@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.2.0...v1.3.0) (2026-09-27)
+
+### ✨ New Features
+
+* **maps:** comprehensive bypass for navigation media provider resolution ([d857279](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/d857279894362da5cd7216fcb26a85444116ef97))
+
 ## [1.2.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0...v1.2.0) (2026-09-27)
 
 ### ✨ New Features
