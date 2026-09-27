@@ -54,16 +54,27 @@ val allowMorpheMusicPatch = bytecodePatch(
     )
 
     execute {
+        // 1. Force the Phenotype media feature flag (apww.l()) to always return true (1).
+        // This is necessary because cloned Google Maps (different package name) fails to sync
+        // Phenotype server flags, which otherwise causes Maps to hide the media playback
+        // preference and return an empty media providers list.
+        val mediaClass = MediaControllerFingerprint.classDef
+        val flagMethod = mediaClass.methods.firstOrNull { it.name == "l" && it.returnType == "Z" }
+        if (flagMethod != null) {
+            flagMethod.replaceInstruction(0, "const/4 v0, 0x1")
+            flagMethod.replaceInstruction(1, "return v0")
+        }
+
+        // 2. Replace the YouTube Music package name string with the target package in navigation media resolution (xzt.ux())
         val instructionMatch = NavigationMediaProvidersFingerprint.instructionMatches.first()
         val register = instructionMatch.getInstruction<OneRegisterInstruction>().registerA
 
-        // 1. Replace the YouTube Music package name string with the target package
         NavigationMediaProvidersFingerprint.method.replaceInstruction(
             instructionMatch.index,
             "const-string v$register, \"$targetPackage\""
         )
 
-        // 2. Bypass the server-side feature flag check (if-eqz v4, :cond_203)
+        // 3. Bypass the server-side feature flag check (if-eqz v4, :cond_203)
         // This ensures YouTube Music is always added to the allowed media list even if disabled by Google config
         for (i in 1..8) {
             val checkIndex = instructionMatch.index - i

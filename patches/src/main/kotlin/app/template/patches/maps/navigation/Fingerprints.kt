@@ -14,3 +14,15 @@ object NavigationMediaProvidersFingerprint : Fingerprint(
         string("android.media.browse.MediaBrowserService")
     )
 )
+
+/**
+ * Fingerprint matching the media controller class (apww in classes6.dex).
+ * Matches method h returning String containing "com.spotify.music".
+ * Allows accessing method l() on this classDef to force the media feature flag to true.
+ */
+object MediaControllerFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    filters = listOf(
+        string("com.spotify.music")
+    )
+)

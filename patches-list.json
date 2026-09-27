@@ -15,7 +15,7 @@
           "packageName": "com.google.android.apps.maps",
           "name": "Google Maps",
           "description": null,
-          "apkFileType": "APK",
+          "apkFileType": null,
           "appIconColor": "#1A73E8",
           "signatures": null,
           "targets": [
@@ -52,7 +52,7 @@
           "packageName": "com.google.android.apps.maps",
           "name": "Google Maps",
           "description": null,
-          "apkFileType": "APK",
+          "apkFileType": null,
           "appIconColor": "#1A73E8",
           "signatures": null,
           "targets": [

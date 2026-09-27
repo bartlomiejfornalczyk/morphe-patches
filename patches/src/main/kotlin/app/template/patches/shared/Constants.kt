@@ -1,6 +1,5 @@
 package app.template.patches.shared
 
-import app.morphe.patcher.patch.ApkFileType
 import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility
 
@@ -8,7 +7,6 @@ object Constants {
     val COMPATIBILITY_GOOGLE_MAPS = Compatibility(
         name = "Google Maps",
         packageName = "com.google.android.apps.maps",
-        apkFileType = ApkFileType.APK,
         appIconColor = 0x1A73E8,
         targets = listOf(
             AppTarget(
