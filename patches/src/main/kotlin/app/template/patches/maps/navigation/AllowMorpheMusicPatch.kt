@@ -107,11 +107,27 @@ val allowMorpheMusicPatch = bytecodePatch(
         )
 
         // 2b. Also replace Google Play Music ("com.google.android.music") at earlier index with Morphe/ReVanced package
+        val altPackage = if (targetPackage == "app.morphe.android.apps.youtube.music") {
+            "app.revanced.android.apps.youtube.music"
+        } else {
+            "app.morphe.android.apps.youtube.music"
+        }
+
+        // 2b. Replace Google Play Music ("com.google.android.music") with alternate package so both Morphe and ReVanced are supported
         for (i in ytmIndex downTo (ytmIndex - 25).coerceAtLeast(0)) {
             val insn = impl.instructions.elementAt(i)
             if ((insn as? ReferenceInstruction)?.reference?.let { (it as? StringReference)?.string == "com.google.android.music" } == true) {
                 val reg = (insn as OneRegisterInstruction).registerA
-                method.replaceInstruction(i, "const-string v$reg, \"app.morphe.android.apps.youtube.music\"")
+                method.replaceInstruction(i, "const-string v$reg, \"$altPackage\"")
+                
+                // Also bypass server-side cpwy.b flag check (if-eqz v4, :cond_1e7)
+                for (j in i downTo (i - 10).coerceAtLeast(0)) {
+                    val checkInsn = impl.instructions.elementAt(j)
+                    if (checkInsn.opcode == Opcode.IF_EQZ) {
+                        method.replaceInstruction(j, "nop")
+                        break
+                    }
+                }
                 break
             }
         }
@@ -138,44 +154,15 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2e. Case 9: Bypass package name matching check (String.equals -> if-eqz v7, :cond_26b)
-        // This ensures ANY installed MediaBrowserService is accepted into the map
-        for (i in (ytmIndex + 40) until (ytmIndex + 80).coerceAtMost(impl.instructions.count() - 2)) {
-            val insn = impl.instructions.elementAt(i)
-            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "equals" } == true) {
-                val branchInsn = impl.instructions.elementAt(i + 2)
-                if (branchInsn.opcode == Opcode.IF_EQZ) {
-                    method.replaceInstruction(i + 2, "nop")
-                    break
-                }
-            }
-        }
-
         // 2f. Case 8: Bypass apww.l() check (if-eqz v2, :cond_338 -> nop)
-        var case8lIndex = -1
         for (i in ytmIndex until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
             if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "l" && (it as? MethodReference)?.returnType == "Z" } == true) {
-                case8lIndex = i
                 val branchInsn = impl.instructions.elementAt(i + 2)
                 if (branchInsn.opcode == Opcode.IF_EQZ) {
                     method.replaceInstruction(i + 2, "nop")
                 }
                 break
-            }
-        }
-
-        // 2g. Case 8: Bypass bwyj.isEmpty() check (if-nez v2, :cond_338 -> nop)
-        if (case8lIndex != -1) {
-            for (i in case8lIndex until (case8lIndex + 20).coerceAtMost(impl.instructions.count() - 2)) {
-                val insn = impl.instructions.elementAt(i)
-                if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "isEmpty" } == true) {
-                    val branchInsn = impl.instructions.elementAt(i + 2)
-                    if (branchInsn.opcode == Opcode.IF_NEZ) {
-                        method.replaceInstruction(i + 2, "nop")
-                        break
-                    }
-                }
             }
         }
     }
