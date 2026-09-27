@@ -1,3 +1,9 @@
+## [1.3.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.3.0...v1.3.1) (2026-09-27)
+
+### 🐛 Bug Fixes
+
+* **maps:** resolve crash by preventing duplicate keys in media provider map ([8576bf0](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/8576bf062aab405be3954fc5faf25bfb833663bd))
+
 ## [1.3.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.2.0...v1.3.0) (2026-09-27)
 
 ### ✨ New Features
