@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.3.1...v1.4.0) (2026-09-28)
+
+### ✨ New Features
+
+* **maps:** add package renaming and MicroG spoofing patches ([c9b0b2d](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/c9b0b2d552bf39749d071ddb260067665a2845d5))
+
 ## [1.3.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.3.0...v1.3.1) (2026-09-27)
 
 ### 🐛 Bug Fixes
