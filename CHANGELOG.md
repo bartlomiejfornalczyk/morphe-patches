@@ -1,3 +1,9 @@
+## [1.4.11](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.10...v1.4.11) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* add MATCH_ALL injection but conditionally preserve move-result register to prevent NullPointerException ([0336789](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/0336789ec3bd6cf1f7ac1c150338ada3d1b2ee22))
+
 ## [1.4.10](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.9...v1.4.10) (2026-09-29)
 
 ### 🐛 Bug Fixes
