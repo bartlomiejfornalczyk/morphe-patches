@@ -1,3 +1,9 @@
+## [1.4.7](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.6...v1.4.7) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* use boolean flag bypass to safely allow Morphe YT Music ([f35a6cf](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/f35a6cfde584a470acfcd38716160037020f248c))
+
 ## [1.4.6](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.5...v1.4.6) (2026-09-29)
 
 ### 🐛 Bug Fixes
