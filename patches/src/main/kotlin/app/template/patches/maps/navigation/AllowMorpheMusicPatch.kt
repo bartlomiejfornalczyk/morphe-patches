@@ -165,7 +165,40 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
+        // 2e. Force queryIntentServices to use MATCH_ALL (0x20000) safely
+        var queryIntentIndex = -1
+        for (i in ytmIndex until impl.instructions.count()) {
+            val insn = impl.instructions.elementAt(i)
+            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "queryIntentServices" } == true) {
+                queryIntentIndex = i
+                break
+            }
+        }
 
+        if (queryIntentIndex != -1) {
+            val invokeInsn = impl.instructions.elementAt(queryIntentIndex) as com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+            val pmReg = invokeInsn.registerC
+            val intentReg = invokeInsn.registerD
+            val flagsReg = invokeInsn.registerE
+
+            val injection = """
+                const v$flagsReg, 0x20000
+                invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
+            """.trimIndent()
+            
+            method.replaceInstruction(queryIntentIndex, injection)
+            
+            // Restore flagsReg to 0 AFTER move-result-object, but ONLY if it wasn't used to store the result!
+            val nextInsn = impl.instructions.elementAt(queryIntentIndex + 1)
+            if (nextInsn.opcode.name.startsWith("move-result")) {
+                val resultReg = (nextInsn as OneRegisterInstruction).registerA
+                if (flagsReg != resultReg) {
+                    method.addInstructions(queryIntentIndex + 2, "const/4 v$flagsReg, 0x0")
+                }
+            } else {
+                method.addInstructions(queryIntentIndex + 1, "const/4 v$flagsReg, 0x0")
+            }
+        }
 
         // 2f. Case 8: Bypass apww.l() check (if-eqz v2, :cond_338 -> nop)
         for (i in ytmIndex until impl.instructions.count()) {
