@@ -2,6 +2,7 @@ package app.template.patches.maps.navigation
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
@@ -180,23 +181,28 @@ val allowMorpheMusicPatch = bytecodePatch(
             val pmReg = invokeInsn.registerC
             val intentReg = invokeInsn.registerD
             val flagsReg = invokeInsn.registerE
-
-            val injection = """
-                const v$flagsReg, 0x20000
-                invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
-            """.trimIndent()
             
-            method.replaceInstruction(queryIntentIndex, injection)
-            
-            // Restore flagsReg to 0 AFTER move-result-object, but ONLY if it wasn't used to store the result!
             val nextInsn = impl.instructions.elementAt(queryIntentIndex + 1)
             if (nextInsn.opcode.name.startsWith("move-result")) {
                 val resultReg = (nextInsn as OneRegisterInstruction).registerA
-                if (flagsReg != resultReg) {
-                    method.addInstructions(queryIntentIndex + 2, "const/4 v$flagsReg, 0x0")
-                }
+                val restore = if (flagsReg != resultReg) "const/4 v$flagsReg, 0x0" else ""
+                
+                val injection = """
+                    const v$flagsReg, 0x20000
+                    invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
+                    move-result-object v$resultReg
+                    $restore
+                """.trimIndent()
+                
+                method.replaceInstruction(queryIntentIndex, injection)
+                method.removeInstruction(queryIntentIndex + 1)
             } else {
-                method.addInstructions(queryIntentIndex + 1, "const/4 v$flagsReg, 0x0")
+                val injection = """
+                    const v$flagsReg, 0x20000
+                    invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
+                    const/4 v$flagsReg, 0x0
+                """.trimIndent()
+                method.replaceInstruction(queryIntentIndex, injection)
             }
         }
 
