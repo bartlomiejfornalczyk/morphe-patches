@@ -106,8 +106,33 @@ val allowMorpheMusicPatch = bytecodePatch(
             "const-string v$register, \"$targetPackage\""
         )
 
-        // 2b. Bypass server-side cpwy.d flag check before ytmIndex (if-eqz v4, :cond_203)
-        // This ensures the target package is ALWAYS added to the allowed list (giving us exactly 1 allowed item)
+        // 2b. Also replace Google Play Music ("com.google.android.music") at earlier index with Morphe/ReVanced package
+        val altPackage = if (targetPackage == "app.morphe.android.apps.youtube.music") {
+            "app.revanced.android.apps.youtube.music"
+        } else {
+            "app.morphe.android.apps.youtube.music"
+        }
+
+        // 2b. Replace Google Play Music ("com.google.android.music") with alternate package so both Morphe and ReVanced are supported
+        for (i in ytmIndex downTo (ytmIndex - 25).coerceAtLeast(0)) {
+            val insn = impl.instructions.elementAt(i)
+            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? StringReference)?.string == "com.google.android.music" } == true) {
+                val reg = (insn as OneRegisterInstruction).registerA
+                method.replaceInstruction(i, "const-string v$reg, \"$altPackage\"")
+                
+                // Also bypass server-side cpwy.b flag check (if-eqz v4, :cond_1e7)
+                for (j in i downTo (i - 10).coerceAtLeast(0)) {
+                    val checkInsn = impl.instructions.elementAt(j)
+                    if (checkInsn.opcode == Opcode.IF_EQZ) {
+                        method.replaceInstruction(j, "nop")
+                        break
+                    }
+                }
+                break
+            }
+        }
+
+        // 2c. Bypass server-side cpwy.d flag check before ytmIndex (if-eqz v4, :cond_203)
         for (i in ytmIndex downTo (ytmIndex - 10).coerceAtLeast(0)) {
             val insn = impl.instructions.elementAt(i)
             if (insn.opcode == Opcode.IF_EQZ) {
@@ -116,7 +141,7 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2c. Case 9: Bypass apww.l() check before ytmIndex (replace move-result v2 with const/4 v2, 0x1)
+        // 2d. Case 9: Bypass apww.l() check before ytmIndex (replace move-result v2 with const/4 v2, 0x1)
         for (i in ytmIndex downTo (ytmIndex - 40).coerceAtLeast(0)) {
             val insn = impl.instructions.elementAt(i)
             if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "l" && (it as? MethodReference)?.returnType == "Z" } == true) {
@@ -129,7 +154,7 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2d. Case 8: Bypass apww.l() check (if-eqz v2, :cond_338 -> nop)
+        // 2f. Case 8: Bypass apww.l() check (if-eqz v2, :cond_338 -> nop)
         for (i in ytmIndex until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
             if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "l" && (it as? MethodReference)?.returnType == "Z" } == true) {
@@ -138,21 +163,6 @@ val allowMorpheMusicPatch = bytecodePatch(
                     method.replaceInstruction(i + 2, "nop")
                 }
                 break
-            }
-        }
-
-        // 2e. Bypass String.equals() check for package names to allow ALL installed media apps (like Spotify).
-        // Since we only forced ONE item into the allowed list (YouTube Music), this will not cause duplicates!
-        for (i in ytmIndex until impl.instructions.count()) {
-            val insn = impl.instructions.elementAt(i)
-            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.definingClass == "Ljava/lang/String;" && it.name == "equals" } == true) {
-                for (j in i + 1 until (i + 10).coerceAtMost(impl.instructions.count())) {
-                    val nextInsn = impl.instructions.elementAt(j)
-                    if (nextInsn.opcode == Opcode.IF_EQZ) {
-                        method.replaceInstruction(j, "nop")
-                        break
-                    }
-                }
             }
         }
     }
