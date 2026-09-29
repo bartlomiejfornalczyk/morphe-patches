@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-29T22:12:17",
-  "description": "## [1.4.8](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.7...v1.4.8) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* hardcode target package to bypass CLI config cache ([0e34fd4](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/0e34fd4160c48ae6a838a89e753675e2454e79b1))\n* revert boolean flag bypass that causes startup crash ([5a28b5e](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/5a28b5e4cb17597d19c6aac2dce465a9db20cd20))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.8/patches-1.4.8.mpp",
+  "created_at": "2026-09-29T22:15:07",
+  "description": "## [1.4.9](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.8...v1.4.9) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* safely restore MATCH_ALL flag after move-result-object ([1feb38f](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/1feb38f077ef6818c4e47c16b0e9c51b98804be2))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.9/patches-1.4.9.mpp",
   "signature_download_url": "",
-  "version": "1.4.8"
+  "version": "1.4.9"
 }

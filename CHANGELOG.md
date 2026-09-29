@@ -1,3 +1,9 @@
+## [1.4.9](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.8...v1.4.9) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* safely restore MATCH_ALL flag after move-result-object ([1feb38f](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/1feb38f077ef6818c4e47c16b0e9c51b98804be2))
+
 ## [1.4.8](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.7...v1.4.8) (2026-09-29)
 
 ### 🐛 Bug Fixes
