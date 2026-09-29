@@ -165,7 +165,7 @@ val allowMorpheMusicPatch = bytecodePatch(
         }
 
         if (queryIntentIndex != -1) {
-            val invokeInsn = impl.instructions.elementAt(queryIntentIndex) as com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+            val invokeInsn = impl.instructions.elementAt(queryIntentIndex) as com.android.tools.smali.dexlib2.iface.instruction.Instruction35c
             val pmReg = invokeInsn.registerC
             val intentReg = invokeInsn.registerD
             val flagsReg = invokeInsn.registerE
