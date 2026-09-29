@@ -1,3 +1,9 @@
+## [1.4.6](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.5...v1.4.6) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* enforce MATCH_ALL flag safely with register restoration ([bc66f10](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/bc66f109bbf3bb99d0d322c28f6e6fa7f6cbf133))
+
 ## [1.4.5](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.4...v1.4.5) (2026-09-29)
 
 ### 🐛 Bug Fixes

@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-29T21:59:30",
-  "description": "## [1.4.5](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.4...v1.4.5) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* revert queryIntentServices MATCH_ALL injection ([6daf2cb](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6daf2cb346c69d38eeba491c40d88116e5a775c6))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.5/patches-1.4.5.mpp",
+  "created_at": "2026-09-29T22:02:27",
+  "description": "## [1.4.6](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.5...v1.4.6) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* enforce MATCH_ALL flag safely with register restoration ([bc66f10](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/bc66f109bbf3bb99d0d322c28f6e6fa7f6cbf133))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.6/patches-1.4.6.mpp",
   "signature_download_url": "",
-  "version": "1.4.5"
+  "version": "1.4.6"
 }
