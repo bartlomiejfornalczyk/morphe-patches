@@ -1,4 +1,4 @@
-﻿package app.template.patches.maps.navigation
+package app.template.patches.maps.navigation
 
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -162,6 +162,19 @@ val allowMorpheMusicPatch = bytecodePatch(
                 if (branchInsn.opcode == Opcode.IF_EQZ) {
                     method.replaceInstruction(i + 2, "nop")
                 }
+                break
+            }
+        }
+
+        // 3. Patch bsma.a() - replace "com.google.android.apps.youtube.music" in the
+        //    trusted media app allowlist so Maps accepts Morphe YT Music connections.
+        val bsmaMethod = BsmaTrustedAppsFingerprint.method
+        val bsmaImpl = bsmaMethod.implementation!!
+        for (i in 0 until bsmaImpl.instructions.count()) {
+            val insn = bsmaImpl.instructions.elementAt(i)
+            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? StringReference)?.string == "com.google.android.apps.youtube.music" } == true) {
+                val reg = (insn as OneRegisterInstruction).registerA
+                bsmaMethod.replaceInstruction(i, "const-string v$reg, \"$targetPackage\"")
                 break
             }
         }
