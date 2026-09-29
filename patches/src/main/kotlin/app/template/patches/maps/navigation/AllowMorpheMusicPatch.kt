@@ -154,6 +154,30 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
+        // 2e. Force queryIntentServices to use MATCH_ALL (0x20000) instead of 0 to fix Android 11+ visibility
+        var queryIntentIndex = -1
+        for (i in ytmIndex until impl.instructions.count()) {
+            val insn = impl.instructions.elementAt(i)
+            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "queryIntentServices" } == true) {
+                queryIntentIndex = i
+                break
+            }
+        }
+
+        if (queryIntentIndex != -1) {
+            val invokeInsn = impl.instructions.elementAt(queryIntentIndex) as com.android.tools.smali.dexlib2.iface.instruction.Instruction35c
+            val pmReg = invokeInsn.registerC
+            val intentReg = invokeInsn.registerD
+            val flagsReg = invokeInsn.registerE
+
+            val injection = """
+                const v$flagsReg, 0x20000
+                invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
+            """.trimIndent()
+            
+            method.replaceInstruction(queryIntentIndex, injection)
+        }
+
         // 2f. Case 8: Bypass apww.l() check (if-eqz v2, :cond_338 -> nop)
         for (i in ytmIndex until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
