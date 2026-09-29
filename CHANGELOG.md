@@ -1,3 +1,9 @@
+## [1.4.13](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.12...v1.4.13) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* remove global apww.l() patch causing NPE on media session creation ([f1f80f0](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/f1f80f05838d200645d81937cf38d9fad4829c80))
+
 ## [1.4.12](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.11...v1.4.12) (2026-09-29)
 
 ### 🐛 Bug Fixes
