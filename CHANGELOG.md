@@ -1,3 +1,9 @@
+## [1.4.16](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.15...v1.4.16) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* eliminate all addInstructions calls - use only replaceInstruction to prevent startup crash from offset shifts ([3d76b91](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/3d76b910976ea31378c6411c2a81e07a7433b5d7))
+
 ## [1.4.15](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.14...v1.4.15) (2026-09-29)
 
 ### 🐛 Bug Fixes

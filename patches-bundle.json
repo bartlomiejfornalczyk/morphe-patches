@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-29T23:02:41",
-  "description": "## [1.4.15](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.14...v1.4.15) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* safely bypass cpwy.b and cpwy.d by explicitly targeting the if-eqz register to prevent memory corruption ([a4deea5](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/a4deea5067846e7551f3d4c32d60c03cbaed5bda))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.15/patches-1.4.15.mpp",
+  "created_at": "2026-09-29T23:12:16",
+  "description": "## [1.4.16](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.15...v1.4.16) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* eliminate all addInstructions calls - use only replaceInstruction to prevent startup crash from offset shifts ([3d76b91](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/3d76b910976ea31378c6411c2a81e07a7433b5d7))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.16/patches-1.4.16.mpp",
   "signature_download_url": "",
-  "version": "1.4.15"
+  "version": "1.4.16"
 }
