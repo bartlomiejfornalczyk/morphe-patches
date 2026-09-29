@@ -1,3 +1,9 @@
+## [1.4.5](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.4...v1.4.5) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* revert queryIntentServices MATCH_ALL injection ([6daf2cb](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6daf2cb346c69d38eeba491c40d88116e5a775c6))
+
 ## [1.4.4](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.3...v1.4.4) (2026-09-29)
 
 ### 🐛 Bug Fixes
