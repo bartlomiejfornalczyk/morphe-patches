@@ -1,8 +1,6 @@
 package app.template.patches.maps.navigation
 
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
@@ -82,7 +80,8 @@ val allowMorpheMusicPatch = bytecodePatch(
     )
 
     execute {
-        // 1. Cleanly patch apww.l() so the feature flag always returns true (1)
+        // 1. Patch apww.l() so the feature flag always returns true (1)
+        // Only use replaceInstruction - never addInstructions (shifts branch offsets = startup crash)
         val mediaClass = MediaControllerFingerprint.classDef
         val flagMethod = mediaClass.methods.firstOrNull { it.name == "l" && it.returnType == "Z" }
         if (flagMethod != null) {
@@ -102,58 +101,47 @@ val allowMorpheMusicPatch = bytecodePatch(
         val ytmIndex = ytmMatch.index
         val register = ytmMatch.getInstruction<OneRegisterInstruction>().registerA
 
-        // 2a. Replace YouTube Music package name string with targetPackage
+        // 2a. Replace the YouTube Music package string with our target package
         method.replaceInstruction(
             ytmIndex,
-            "const-string v$register, \"app.morphe.android.apps.youtube.music\""
+            "const-string v$register, \"$targetPackage\""
         )
 
-        // 2b. Also replace Google Play Music ("com.google.android.music") at earlier index with Morphe/ReVanced package
+        // 2b. Replace "com.google.android.music" (Google Play Music) with an alternate package
         val altPackage = if (targetPackage == "app.morphe.android.apps.youtube.music") {
             "app.revanced.android.apps.youtube.music"
         } else {
             "app.morphe.android.apps.youtube.music"
         }
 
-        // 2b. Replace Google Play Music ("com.google.android.music") with alternate package so both Morphe and ReVanced are supported
         for (i in ytmIndex downTo (ytmIndex - 25).coerceAtLeast(0)) {
             val insn = impl.instructions.elementAt(i)
             if ((insn as? ReferenceInstruction)?.reference?.let { (it as? StringReference)?.string == "com.google.android.music" } == true) {
                 val reg = (insn as OneRegisterInstruction).registerA
                 method.replaceInstruction(i, "const-string v$reg, \"$altPackage\"")
-                
-                // Bypass server-side cpwy.b flag check precisely by forcing the if-eqz register to 1
-                var targetIfEqzIndex = -1
+
+                // Bypass cpwy.b flag check: find the if-eqz and nop it (replaceInstruction only, no offset shift)
                 for (j in i downTo (i - 10).coerceAtLeast(0)) {
-                    if (impl.instructions.elementAt(j).opcode == Opcode.IF_EQZ) {
-                        targetIfEqzIndex = j
+                    val checkInsn = impl.instructions.elementAt(j)
+                    if (checkInsn.opcode == Opcode.IF_EQZ) {
+                        method.replaceInstruction(j, "nop")
                         break
                     }
                 }
-                if (targetIfEqzIndex != -1) {
-                    val ifEqzInsn = impl.instructions.elementAt(targetIfEqzIndex) as OneRegisterInstruction
-                    val boolReg = ifEqzInsn.registerA
-                    method.addInstructions(targetIfEqzIndex, "const/4 v$boolReg, 0x1")
-                }
                 break
             }
         }
 
-        // 2c. Bypass server-side cpwy.d flag check precisely by forcing the if-eqz register to 1
-        var targetIfEqzIndex2 = -1
+        // 2c. Bypass cpwy.d flag check: find the if-eqz before ytmIndex and nop it
         for (i in ytmIndex downTo (ytmIndex - 10).coerceAtLeast(0)) {
-            if (impl.instructions.elementAt(i).opcode == Opcode.IF_EQZ) {
-                targetIfEqzIndex2 = i
+            val insn = impl.instructions.elementAt(i)
+            if (insn.opcode == Opcode.IF_EQZ) {
+                method.replaceInstruction(i, "nop")
                 break
             }
         }
-        if (targetIfEqzIndex2 != -1) {
-            val ifEqzInsn = impl.instructions.elementAt(targetIfEqzIndex2) as OneRegisterInstruction
-            val boolReg = ifEqzInsn.registerA
-            method.addInstructions(targetIfEqzIndex2, "const/4 v$boolReg, 0x1")
-        }
 
-        // 2d. Case 9: Bypass apww.l() check before ytmIndex (replace move-result v2 with const/4 v2, 0x1)
+        // 2d. Bypass apww.l() check before ytmIndex: replace move-result with const/4 0x1
         for (i in ytmIndex downTo (ytmIndex - 40).coerceAtLeast(0)) {
             val insn = impl.instructions.elementAt(i)
             if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "l" && (it as? MethodReference)?.returnType == "Z" } == true) {
@@ -166,31 +154,29 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2e. Force queryIntentServices to use MATCH_ALL (0x20000) safely
-        var queryIntentIndex = -1
+        // 2e. Force queryIntentServices to use MATCH_ALL (0x20000) to fix Android 11+ visibility.
+        // ONLY use replaceInstruction - the smali assembler allows multi-instruction replacement atomically.
         for (i in ytmIndex until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
             if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "queryIntentServices" } == true) {
-                queryIntentIndex = i
+                val invokeInsn = insn as com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+                val pmReg = invokeInsn.registerC
+                val intentReg = invokeInsn.registerD
+                val flagsReg = invokeInsn.registerE
+
+                // Atomic replacement: the smali assembler merges this into one instruction slot
+                method.replaceInstruction(
+                    i,
+                    """
+                    const v$flagsReg, 0x20000
+                    invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
+                    """.trimIndent()
+                )
                 break
             }
         }
 
-        if (queryIntentIndex != -1) {
-            val invokeInsn = impl.instructions.elementAt(queryIntentIndex) as com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
-            val pmReg = invokeInsn.registerC
-            val intentReg = invokeInsn.registerD
-            val flagsReg = invokeInsn.registerE
-            
-            val injection = """
-                const v$flagsReg, 0x20000
-                invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
-            """.trimIndent()
-            
-            method.replaceInstruction(queryIntentIndex, injection)
-        }
-
-        // 2f. Case 8: Bypass apww.l() check (if-eqz v2, :cond_338 -> nop)
+        // 2f. Bypass apww.l() check after ytmIndex: replace if-eqz with nop
         for (i in ytmIndex until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
             if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "l" && (it as? MethodReference)?.returnType == "Z" } == true) {
