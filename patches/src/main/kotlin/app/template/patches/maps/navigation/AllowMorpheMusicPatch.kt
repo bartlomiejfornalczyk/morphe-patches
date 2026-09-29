@@ -1,5 +1,6 @@
 package app.template.patches.maps.navigation
 
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
@@ -120,11 +121,16 @@ val allowMorpheMusicPatch = bytecodePatch(
                 val reg = (insn as OneRegisterInstruction).registerA
                 method.replaceInstruction(i, "const-string v$reg, \"$altPackage\"")
                 
-                // Also bypass server-side cpwy.b flag check (if-eqz v4, :cond_1e7)
-                for (j in i downTo (i - 10).coerceAtLeast(0)) {
+                // Bypass server-side cpwy.b flag check by forcing the loaded boolean to true (1) safely
+                for (j in i downTo (i - 15).coerceAtLeast(0)) {
                     val checkInsn = impl.instructions.elementAt(j)
-                    if (checkInsn.opcode == Opcode.IF_EQZ) {
-                        method.replaceInstruction(j, "nop")
+                    if (checkInsn.opcode == Opcode.IGET_BOOLEAN) {
+                        val boolReg = (checkInsn as com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction).registerA
+                        method.addInstructions(j + 1, "const/4 v$boolReg, 0x1")
+                        break
+                    } else if (checkInsn.opcode == Opcode.MOVE_RESULT) {
+                        val boolReg = (checkInsn as OneRegisterInstruction).registerA
+                        method.addInstructions(j + 1, "const/4 v$boolReg, 0x1")
                         break
                     }
                 }
@@ -132,11 +138,16 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2c. Bypass server-side cpwy.d flag check before ytmIndex (if-eqz v4, :cond_203)
-        for (i in ytmIndex downTo (ytmIndex - 10).coerceAtLeast(0)) {
+        // 2c. Bypass server-side cpwy.d flag check by forcing the loaded boolean to true (1) safely
+        for (i in ytmIndex downTo (ytmIndex - 15).coerceAtLeast(0)) {
             val insn = impl.instructions.elementAt(i)
-            if (insn.opcode == Opcode.IF_EQZ) {
-                method.replaceInstruction(i, "nop")
+            if (insn.opcode == Opcode.IGET_BOOLEAN) {
+                val reg = (insn as com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction).registerA
+                method.addInstructions(i + 1, "const/4 v$reg, 0x1")
+                break
+            } else if (insn.opcode == Opcode.MOVE_RESULT) {
+                val reg = (insn as OneRegisterInstruction).registerA
+                method.addInstructions(i + 1, "const/4 v$reg, 0x1")
                 break
             }
         }
@@ -154,30 +165,7 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2e. Force queryIntentServices to use MATCH_ALL (0x20000) safely
-        var queryIntentIndex = -1
-        for (i in ytmIndex until impl.instructions.count()) {
-            val insn = impl.instructions.elementAt(i)
-            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "queryIntentServices" } == true) {
-                queryIntentIndex = i
-                break
-            }
-        }
 
-        if (queryIntentIndex != -1) {
-            val invokeInsn = impl.instructions.elementAt(queryIntentIndex) as com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
-            val pmReg = invokeInsn.registerC
-            val intentReg = invokeInsn.registerD
-            val flagsReg = invokeInsn.registerE
-
-            val injection = """
-                const v$flagsReg, 0x20000
-                invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
-                const/4 v$flagsReg, 0x0
-            """.trimIndent()
-            
-            method.replaceInstruction(queryIntentIndex, injection)
-        }
 
         // 2f. Case 8: Bypass apww.l() check (if-eqz v2, :cond_338 -> nop)
         for (i in ytmIndex until impl.instructions.count()) {
