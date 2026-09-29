@@ -1,3 +1,9 @@
+## [1.4.10](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.9...v1.4.10) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* remove MATCH_ALL to prevent VerifyError, use safe boolean flag override ([678e7d1](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/678e7d10cdcccfe104467ddee172612f1000b526))
+
 ## [1.4.9](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.8...v1.4.9) (2026-09-29)
 
 ### 🐛 Bug Fixes

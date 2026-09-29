@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-29T22:15:07",
-  "description": "## [1.4.9](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.8...v1.4.9) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* safely restore MATCH_ALL flag after move-result-object ([1feb38f](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/1feb38f077ef6818c4e47c16b0e9c51b98804be2))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.9/patches-1.4.9.mpp",
+  "created_at": "2026-09-29T22:22:03",
+  "description": "## [1.4.10](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.9...v1.4.10) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* remove MATCH_ALL to prevent VerifyError, use safe boolean flag override ([678e7d1](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/678e7d10cdcccfe104467ddee172612f1000b526))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.10/patches-1.4.10.mpp",
   "signature_download_url": "",
-  "version": "1.4.9"
+  "version": "1.4.10"
 }
