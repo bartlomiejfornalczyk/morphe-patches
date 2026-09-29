@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.3...v1.4.4) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* enforce MATCH_ALL flag in queryIntentServices to fix Android 11+ visibility for YT Music ([272d966](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/272d966dcd314fe4fe19551d37e41ec7130e109f))
+* use FiveRegisterInstruction instead of Instruction35c to fix build ([6d9a2c3](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6d9a2c3432eebffc816d74eec6c52e1ccb7ef2ad))
+
 ## [1.4.3](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.2...v1.4.3) (2026-09-29)
 
 ### 🐛 Bug Fixes
