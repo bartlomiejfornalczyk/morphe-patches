@@ -1,3 +1,9 @@
+## [1.4.17](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.16...v1.4.17) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* revert to stable 6daf2cb content - no startup crash ([cd95a4d](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/cd95a4daa818d7e9ce6acacab594c40f3d5139ae))
+
 ## [1.4.16](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.15...v1.4.16) (2026-09-29)
 
 ### 🐛 Bug Fixes
