@@ -23,16 +23,19 @@ val restoreMapDataPatch = bytecodePatch(
 
     execute {
         val headers = IdentityHeadersFingerprint.instructionMatches
+        val method = IdentityHeadersFingerprint.method
+        val impl = method.implementation!!
+        
         listOf(
             headers[1] to GENUINE_PACKAGE,
             headers[3] to GENUINE_CERT,
-        ).forEach { (supplier, genuineValue) ->
-            supplier.getMethodCalled().addInstructions(
-                0,
-                """
-                    const-string v0, "$genuineValue"
-                    return-object v0
-                """,
+        ).forEach { (invokeMatch, genuineValue) ->
+            val invokeIndex = invokeMatch.index
+            val moveResultInsn = impl.instructions.elementAt(invokeIndex + 1) as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+            val destReg = moveResultInsn.registerA
+            method.replaceInstruction(
+                invokeIndex + 1,
+                "const-string v$destReg, \"$genuineValue\""
             )
         }
 
@@ -67,15 +70,23 @@ val restoreMapDataPatch = bytecodePatch(
             val instructions = implementation!!.instructions
             if (instructions[handler].opcode != Opcode.MOVE_EXCEPTION) throw PatchException("property binder's handler no longer starts with move-exception")
             if (instructions[increment].opcode != Opcode.ADD_INT_LIT8) throw PatchException("property binder's try range is no longer followed by the loop increment")
-            implementation!!.replaceInstruction(handler, BuilderInstruction10t(Opcode.GOTO, implementation!!.newLabelForIndex(increment)))
+            addInstructionsWithLabels(
+                handler + 1,
+                "goto :increment",
+                ExternalLabel("increment", instructions[increment]),
+            )
         }
 
-        ApiKeyReaderFingerprint.method.addInstructions(
+        val apiKeyMethod = ApiKeyReaderFingerprint.method
+        val isStatic = com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(apiKeyMethod.accessFlags)
+        val contextReg = if (isStatic) "p0" else "p1"
+        val stringReg = if (isStatic) "p1" else "p2"
+        apiKeyMethod.addInstructions(
             0,
             """
-                invoke-virtual { p1 }, Landroid/content/Context;->getPackageName()Ljava/lang/String;
-                move-result-object p2
-            """,
+                invoke-virtual { $contextReg }, Landroid/content/Context;->getPackageName()Ljava/lang/String;
+                move-result-object $stringReg
+            """
         )
     }
 }
