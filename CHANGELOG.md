@@ -1,3 +1,9 @@
+## [1.4.15](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.14...v1.4.15) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* safely bypass cpwy.b and cpwy.d by explicitly targeting the if-eqz register to prevent memory corruption ([a4deea5](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/a4deea5067846e7551f3d4c32d60c03cbaed5bda))
+
 ## [1.4.14](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.13...v1.4.14) (2026-09-29)
 
 ### 🐛 Bug Fixes
