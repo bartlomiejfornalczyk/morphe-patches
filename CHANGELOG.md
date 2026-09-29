@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.2...v1.4.3) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* actually revert spotify bypass to trigger release ([cadce2b](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/cadce2bfaa644410e35737d11a6084213afcad31))
+* revert RestoreMapDataPatch crash fixes that break v1.4.0 ([ebf1827](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/ebf1827c0880b01a2a25acd32191e8d417d8dff9))
+
 ## [1.4.2](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.1...v1.4.2) (2026-09-29)
 
 ## [1.4.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.0...v1.4.1) (2026-09-29)
