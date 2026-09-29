@@ -103,7 +103,7 @@ val allowMorpheMusicPatch = bytecodePatch(
         // 2a. Replace YouTube Music package name string with targetPackage
         method.replaceInstruction(
             ytmIndex,
-            "const-string v$register, \"$targetPackage\""
+            "const-string v$register, \"app.morphe.android.apps.youtube.music\""
         )
 
         // 2b. Also replace Google Play Music ("com.google.android.music") at earlier index with Morphe/ReVanced package
