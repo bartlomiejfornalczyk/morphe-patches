@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-29T21:28:53",
-  "description": "## [1.4.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.0...v1.4.1) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* add missing replaceInstruction import in RestoreMapDataPatch ([5ed2970](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/5ed2970355a6f303ff89408b0d480a9c52814a06))\n* apply known crash fixes to v1.4.0 RestoreMapDataPatch ([c68818b](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/c68818bd6590c172732092f71e84d2316ed1f74c))\n* refine media provider bypass to include Spotify without causing duplicates ([6f2ec06](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6f2ec06af32014757b4c1b6f106b8eeef859e7c3))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.1/patches-1.4.1.mpp",
+  "created_at": "2026-09-29T21:36:48",
+  "description": "## [1.4.2](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.1...v1.4.2) (2026-09-29)",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.2/patches-1.4.2.mpp",
   "signature_download_url": "",
-  "version": "1.4.1"
+  "version": "1.4.2"
 }
