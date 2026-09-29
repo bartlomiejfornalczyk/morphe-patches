@@ -122,25 +122,35 @@ val allowMorpheMusicPatch = bytecodePatch(
                 val reg = (insn as OneRegisterInstruction).registerA
                 method.replaceInstruction(i, "const-string v$reg, \"$altPackage\"")
                 
-                // Also bypass server-side cpwy.b flag check (if-eqz v4, :cond_1e7)
+                // Bypass server-side cpwy.b flag check precisely by forcing the if-eqz register to 1
+                var targetIfEqzIndex = -1
                 for (j in i downTo (i - 10).coerceAtLeast(0)) {
-                    val checkInsn = impl.instructions.elementAt(j)
-                    if (checkInsn.opcode == Opcode.IF_EQZ) {
-                        method.replaceInstruction(j, "nop")
+                    if (impl.instructions.elementAt(j).opcode == Opcode.IF_EQZ) {
+                        targetIfEqzIndex = j
                         break
                     }
+                }
+                if (targetIfEqzIndex != -1) {
+                    val ifEqzInsn = impl.instructions.elementAt(targetIfEqzIndex) as OneRegisterInstruction
+                    val boolReg = ifEqzInsn.registerA
+                    method.addInstructions(targetIfEqzIndex, "const/4 v$boolReg, 0x1")
                 }
                 break
             }
         }
 
-        // 2c. Bypass server-side cpwy.d flag check before ytmIndex (if-eqz v4, :cond_203)
+        // 2c. Bypass server-side cpwy.d flag check precisely by forcing the if-eqz register to 1
+        var targetIfEqzIndex2 = -1
         for (i in ytmIndex downTo (ytmIndex - 10).coerceAtLeast(0)) {
-            val insn = impl.instructions.elementAt(i)
-            if (insn.opcode == Opcode.IF_EQZ) {
-                method.replaceInstruction(i, "nop")
+            if (impl.instructions.elementAt(i).opcode == Opcode.IF_EQZ) {
+                targetIfEqzIndex2 = i
                 break
             }
+        }
+        if (targetIfEqzIndex2 != -1) {
+            val ifEqzInsn = impl.instructions.elementAt(targetIfEqzIndex2) as OneRegisterInstruction
+            val boolReg = ifEqzInsn.registerA
+            method.addInstructions(targetIfEqzIndex2, "const/4 v$boolReg, 0x1")
         }
 
         // 2d. Case 9: Bypass apww.l() check before ytmIndex (replace move-result v2 with const/4 v2, 0x1)
