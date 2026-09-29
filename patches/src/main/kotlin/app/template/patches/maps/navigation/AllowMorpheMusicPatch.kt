@@ -82,6 +82,18 @@ val allowMorpheMusicPatch = bytecodePatch(
     )
 
     execute {
+        // 1. Cleanly patch apww.l() so the feature flag always returns true (1)
+        val mediaClass = MediaControllerFingerprint.classDef
+        val flagMethod = mediaClass.methods.firstOrNull { it.name == "l" && it.returnType == "Z" }
+        if (flagMethod != null) {
+            val totalInsn = flagMethod.implementation?.instructions?.count() ?: 0
+            for (i in 2 until totalInsn) {
+                flagMethod.replaceInstruction(i, "nop")
+            }
+            flagMethod.replaceInstruction(0, "const/4 v0, 0x1")
+            flagMethod.replaceInstruction(1, "return v0")
+        }
+
         // 2. Patch navigation media provider resolution method (xzt.ux())
         val method = NavigationMediaProvidersFingerprint.method
         val impl = method.implementation!!
@@ -110,16 +122,11 @@ val allowMorpheMusicPatch = bytecodePatch(
                 val reg = (insn as OneRegisterInstruction).registerA
                 method.replaceInstruction(i, "const-string v$reg, \"$altPackage\"")
                 
-                // Bypass server-side cpwy.b flag check by forcing the loaded boolean to true (1) safely
-                for (j in i downTo (i - 15).coerceAtLeast(0)) {
+                // Also bypass server-side cpwy.b flag check (if-eqz v4, :cond_1e7)
+                for (j in i downTo (i - 10).coerceAtLeast(0)) {
                     val checkInsn = impl.instructions.elementAt(j)
-                    if (checkInsn.opcode == Opcode.IGET_BOOLEAN) {
-                        val boolReg = (checkInsn as com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction).registerA
-                        method.addInstructions(j + 1, "const/4 v$boolReg, 0x1")
-                        break
-                    } else if (checkInsn.opcode == Opcode.MOVE_RESULT) {
-                        val boolReg = (checkInsn as OneRegisterInstruction).registerA
-                        method.addInstructions(j + 1, "const/4 v$boolReg, 0x1")
+                    if (checkInsn.opcode == Opcode.IF_EQZ) {
+                        method.replaceInstruction(j, "nop")
                         break
                     }
                 }
@@ -127,16 +134,11 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2c. Bypass server-side cpwy.d flag check by forcing the loaded boolean to true (1) safely
-        for (i in ytmIndex downTo (ytmIndex - 15).coerceAtLeast(0)) {
+        // 2c. Bypass server-side cpwy.d flag check before ytmIndex (if-eqz v4, :cond_203)
+        for (i in ytmIndex downTo (ytmIndex - 10).coerceAtLeast(0)) {
             val insn = impl.instructions.elementAt(i)
-            if (insn.opcode == Opcode.IGET_BOOLEAN) {
-                val reg = (insn as com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction).registerA
-                method.addInstructions(i + 1, "const/4 v$reg, 0x1")
-                break
-            } else if (insn.opcode == Opcode.MOVE_RESULT) {
-                val reg = (insn as OneRegisterInstruction).registerA
-                method.addInstructions(i + 1, "const/4 v$reg, 0x1")
+            if (insn.opcode == Opcode.IF_EQZ) {
+                method.replaceInstruction(i, "nop")
                 break
             }
         }
@@ -170,28 +172,12 @@ val allowMorpheMusicPatch = bytecodePatch(
             val intentReg = invokeInsn.registerD
             val flagsReg = invokeInsn.registerE
             
-            val nextInsn = impl.instructions.elementAt(queryIntentIndex + 1)
-            if (nextInsn.opcode.name.startsWith("move-result")) {
-                val resultReg = (nextInsn as OneRegisterInstruction).registerA
-                val restore = if (flagsReg != resultReg) "const/4 v$flagsReg, 0x0" else ""
-                
-                val injection = """
-                    const v$flagsReg, 0x20000
-                    invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
-                    move-result-object v$resultReg
-                    $restore
-                """.trimIndent()
-                
-                method.replaceInstruction(queryIntentIndex, injection)
-                method.removeInstruction(queryIntentIndex + 1)
-            } else {
-                val injection = """
-                    const v$flagsReg, 0x20000
-                    invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
-                    const/4 v$flagsReg, 0x0
-                """.trimIndent()
-                method.replaceInstruction(queryIntentIndex, injection)
-            }
+            val injection = """
+                const v$flagsReg, 0x20000
+                invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
+            """.trimIndent()
+            
+            method.replaceInstruction(queryIntentIndex, injection)
         }
 
         // 2f. Case 8: Bypass apww.l() check (if-eqz v2, :cond_338 -> nop)
