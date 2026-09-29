@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-29T22:07:19",
-  "description": "## [1.4.7](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.6...v1.4.7) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* use boolean flag bypass to safely allow Morphe YT Music ([f35a6cf](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/f35a6cfde584a470acfcd38716160037020f248c))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.7/patches-1.4.7.mpp",
+  "created_at": "2026-09-29T22:12:17",
+  "description": "## [1.4.8](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.7...v1.4.8) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* hardcode target package to bypass CLI config cache ([0e34fd4](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/0e34fd4160c48ae6a838a89e753675e2454e79b1))\n* revert boolean flag bypass that causes startup crash ([5a28b5e](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/5a28b5e4cb17597d19c6aac2dce465a9db20cd20))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.8/patches-1.4.8.mpp",
   "signature_download_url": "",
-  "version": "1.4.7"
+  "version": "1.4.8"
 }

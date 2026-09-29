@@ -1,3 +1,10 @@
+## [1.4.8](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.7...v1.4.8) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* hardcode target package to bypass CLI config cache ([0e34fd4](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/0e34fd4160c48ae6a838a89e753675e2454e79b1))
+* revert boolean flag bypass that causes startup crash ([5a28b5e](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/5a28b5e4cb17597d19c6aac2dce465a9db20cd20))
+
 ## [1.4.7](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.6...v1.4.7) (2026-09-29)
 
 ### 🐛 Bug Fixes
