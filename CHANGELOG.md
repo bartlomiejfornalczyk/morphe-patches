@@ -1,3 +1,9 @@
+## [1.4.14](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.13...v1.4.14) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* revert to EXACT 1.8.6 stable code for bytecode patches to resolve UI click crash ([c6e7d25](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/c6e7d256d28bfaf3eda83d4d4cd7dc53a8d441f0))
+
 ## [1.4.13](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.12...v1.4.13) (2026-09-29)
 
 ### 🐛 Bug Fixes
