@@ -1,3 +1,9 @@
+## [1.4.19](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.18...v1.4.19) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* inject MATCH_ALL via same-size CHECK_CAST replacement to avoid method expansion and startup crash ([0b70df9](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/0b70df9f3fe94bd5422226cb014c141df39eb72e))
+
 ## [1.4.18](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.17...v1.4.18) (2026-09-29)
 
 ### 🐛 Bug Fixes
