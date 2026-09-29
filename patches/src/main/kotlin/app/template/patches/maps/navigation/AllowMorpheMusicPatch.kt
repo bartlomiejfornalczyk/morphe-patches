@@ -1,7 +1,6 @@
 package app.template.patches.maps.navigation
 
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
@@ -121,17 +120,11 @@ val allowMorpheMusicPatch = bytecodePatch(
                 val reg = (insn as OneRegisterInstruction).registerA
                 method.replaceInstruction(i, "const-string v$reg, \"$altPackage\"")
                 
-                // Bypass server-side cpwy.b flag check by forcing the loaded boolean to true (1)
-                for (j in i downTo (i - 15).coerceAtLeast(0)) {
+                // Also bypass server-side cpwy.b flag check (if-eqz v4, :cond_1e7)
+                for (j in i downTo (i - 10).coerceAtLeast(0)) {
                     val checkInsn = impl.instructions.elementAt(j)
-                    if (checkInsn.opcode == Opcode.IGET_BOOLEAN) {
-                        val boolReg = (checkInsn as com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction).registerA
-                        method.replaceInstruction(j, "const/4 v$boolReg, 0x1")
-                        break
-                    } else if (checkInsn.opcode == Opcode.MOVE_RESULT) {
-                        val boolReg = (checkInsn as OneRegisterInstruction).registerA
-                        method.replaceInstruction(j - 1, "const/4 v$boolReg, 0x1")
-                        method.removeInstruction(j)
+                    if (checkInsn.opcode == Opcode.IF_EQZ) {
+                        method.replaceInstruction(j, "nop")
                         break
                     }
                 }
@@ -139,17 +132,11 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2c. Bypass server-side cpwy.d flag check by forcing the loaded boolean to true (1)
-        for (i in ytmIndex downTo (ytmIndex - 15).coerceAtLeast(0)) {
+        // 2c. Bypass server-side cpwy.d flag check before ytmIndex (if-eqz v4, :cond_203)
+        for (i in ytmIndex downTo (ytmIndex - 10).coerceAtLeast(0)) {
             val insn = impl.instructions.elementAt(i)
-            if (insn.opcode == Opcode.IGET_BOOLEAN) {
-                val reg = (insn as com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction).registerA
-                method.replaceInstruction(i, "const/4 v$reg, 0x1")
-                break
-            } else if (insn.opcode == Opcode.MOVE_RESULT) {
-                val reg = (insn as OneRegisterInstruction).registerA
-                method.replaceInstruction(i - 1, "const/4 v$reg, 0x1")
-                method.removeInstruction(i)
+            if (insn.opcode == Opcode.IF_EQZ) {
+                method.replaceInstruction(i, "nop")
                 break
             }
         }
