@@ -1,5 +1,6 @@
 package app.template.patches.maps.navigation
 
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
@@ -173,10 +174,16 @@ val allowMorpheMusicPatch = bytecodePatch(
             val injection = """
                 const v$flagsReg, 0x20000
                 invoke-virtual {v$pmReg, v$intentReg, v$flagsReg}, Landroid/content/pm/PackageManager;->queryIntentServices(Landroid/content/Intent;I)Ljava/util/List;
-                const/4 v$flagsReg, 0x0
             """.trimIndent()
             
             method.replaceInstruction(queryIntentIndex, injection)
+            
+            val nextInsn = impl.instructions.elementAt(queryIntentIndex + 1)
+            if (nextInsn.opcode.name.startsWith("move-result")) {
+                method.addInstructions(queryIntentIndex + 2, "const/4 v$flagsReg, 0x0")
+            } else {
+                method.addInstructions(queryIntentIndex + 1, "const/4 v$flagsReg, 0x0")
+            }
         }
 
         // 2f. Case 8: Bypass apww.l() check (if-eqz v2, :cond_338 -> nop)
