@@ -1,3 +1,9 @@
+## [1.4.18](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.17...v1.4.18) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* replace YT Music package in bsma.a trusted allowlist so Maps accepts Morphe YT Music ([5e29368](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/5e293680428981e42e8f6a0493e7b183d4762102))
+
 ## [1.4.17](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.16...v1.4.17) (2026-09-29)
 
 ### 🐛 Bug Fixes
