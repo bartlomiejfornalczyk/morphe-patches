@@ -1,3 +1,9 @@
+## [1.4.12](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.11...v1.4.12) (2026-09-29)
+
+### 🐛 Bug Fixes
+
+* replace move-result atomically to avoid addInstructions offset bug ([e47b2f1](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/e47b2f1b6658c6c396b9adc0e857f05f079b4d6c))
+
 ## [1.4.11](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.10...v1.4.11) (2026-09-29)
 
 ### 🐛 Bug Fixes

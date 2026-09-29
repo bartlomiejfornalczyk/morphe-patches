@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-29T22:29:44",
-  "description": "## [1.4.11](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.10...v1.4.11) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* add MATCH_ALL injection but conditionally preserve move-result register to prevent NullPointerException ([0336789](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/0336789ec3bd6cf1f7ac1c150338ada3d1b2ee22))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.11/patches-1.4.11.mpp",
+  "created_at": "2026-09-29T22:37:23",
+  "description": "## [1.4.12](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.11...v1.4.12) (2026-09-29)\n\n### 🐛 Bug Fixes\n\n* replace move-result atomically to avoid addInstructions offset bug ([e47b2f1](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/e47b2f1b6658c6c396b9adc0e857f05f079b4d6c))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.12/patches-1.4.12.mpp",
   "signature_download_url": "",
-  "version": "1.4.11"
+  "version": "1.4.12"
 }
