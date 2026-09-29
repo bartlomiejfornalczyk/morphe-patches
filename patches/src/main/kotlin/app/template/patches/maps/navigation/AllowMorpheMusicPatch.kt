@@ -82,18 +82,6 @@ val allowMorpheMusicPatch = bytecodePatch(
     )
 
     execute {
-        // 1. Cleanly patch apww.l() so the feature flag always returns true (1)
-        val mediaClass = MediaControllerFingerprint.classDef
-        val flagMethod = mediaClass.methods.firstOrNull { it.name == "l" && it.returnType == "Z" }
-        if (flagMethod != null) {
-            val totalInsn = flagMethod.implementation?.instructions?.count() ?: 0
-            for (i in 2 until totalInsn) {
-                flagMethod.replaceInstruction(i, "nop")
-            }
-            flagMethod.replaceInstruction(0, "const/4 v0, 0x1")
-            flagMethod.replaceInstruction(1, "return v0")
-        }
-
         // 2. Patch navigation media provider resolution method (xzt.ux())
         val method = NavigationMediaProvidersFingerprint.method
         val impl = method.implementation!!
