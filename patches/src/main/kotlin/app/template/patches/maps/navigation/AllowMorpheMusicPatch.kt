@@ -166,6 +166,33 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
+        // 2g. Inject MATCH_ALL (0x20000) into queryIntentServices flags WITHOUT expanding the method.
+        //
+        // Strategy: Replace the CHECK_CAST instruction 3 slots before queryIntentServices with
+        // "const/high16 v{flagsReg}, 0x0002" (= 0x0002 << 16 = 0x20000 = MATCH_ALL).
+        //
+        // Both CHECK_CAST and const/high16 are format-21c/21h = 4 bytes each → EXACT same size.
+        // Method bytes are unchanged → no branch offset recalculation needed → no startup crash.
+        //
+        // Skipping CHECK_CAST is safe: v0 holds an nxb object loaded by the IGET_OBJECT
+        // immediately before CHECK_CAST; the cast was just a type assertion, never needed at runtime.
+        for (i in ytmIndex until impl.instructions.count()) {
+            val insn = impl.instructions.elementAt(i)
+            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "queryIntentServices" } == true) {
+                val invokeInsn = insn as com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+                val flagsReg = invokeInsn.registerE
+                // CHECK_CAST is exactly 3 instructions before queryIntentServices
+                val checkCastIndex = i - 3
+                val checkCastInsn = impl.instructions.elementAt(checkCastIndex)
+                if (checkCastInsn.opcode == Opcode.CHECK_CAST) {
+                    // const/high16 vX, 0x0002  → vX = 0x0002 << 16 = 0x20000 (MATCH_ALL)
+                    // 4 bytes exactly like CHECK_CAST, method size unchanged
+                    method.replaceInstruction(checkCastIndex, "const/high16 v$flagsReg, 0x0002")
+                }
+                break
+            }
+        }
+
         // 3. Patch bsma.a() - replace "com.google.android.apps.youtube.music" in the
         //    trusted media app allowlist so Maps accepts Morphe YT Music connections.
         val bsmaMethod = BsmaTrustedAppsFingerprint.method
