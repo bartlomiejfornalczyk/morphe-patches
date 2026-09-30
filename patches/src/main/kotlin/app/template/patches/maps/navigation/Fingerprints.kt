@@ -1,7 +1,6 @@
 package app.template.patches.maps.navigation
 
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.methodCall
 import app.morphe.patcher.string
 
 /**
@@ -28,16 +27,3 @@ object MediaControllerFingerprint : Fingerprint(
     )
 )
 
-/**
- * Fingerprint matching the media browser subscription callback (bog.n()).
- * Calls MediaBrowser.getRoot() to subscribe to media items.
- */
-object MediaBrowserSubscribeFingerprint : Fingerprint(
-    returnType = "V",
-    filters = listOf(
-        methodCall(
-            definingClass = "Landroid/media/browse/MediaBrowser;",
-            name = "getRoot"
-        )
-    )
-)
