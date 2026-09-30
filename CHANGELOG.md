@@ -1,3 +1,9 @@
+## [1.4.27](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.26...v1.4.27) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+* resolve crash on start by keeping loop bytecode intact and safe build call ([dbd2e15](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/dbd2e154a182e40a610f2bc5d5b908b70736ac60))
+
 ## [1.4.26](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.25...v1.4.26) (2026-09-30)
 
 ### 🐛 Bug Fixes
