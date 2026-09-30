@@ -1,3 +1,9 @@
+## [1.4.23](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.22...v1.4.23) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+* set explicit package on MediaBrowserService Intent and fix XML namespace in manifest patch ([96047dc](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/96047dc9182488f29fb54b7715b24ca657e37fbf))
+
 ## [1.4.22](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.21...v1.4.22) (2026-09-30)
 
 ### 🐛 Bug Fixes
