@@ -1,3 +1,9 @@
+## [1.4.24](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.23...v1.4.24) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+* direct injection of Morphe YT Music ResolveInfo fallback into media providers map ([210b0d9](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/210b0d92fd591b6f59db6ef944c13a242cb2350d))
+
 ## [1.4.23](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.22...v1.4.23) (2026-09-30)
 
 ### 🐛 Bug Fixes
