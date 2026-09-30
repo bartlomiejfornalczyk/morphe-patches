@@ -1,3 +1,9 @@
+## [1.4.22](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.21...v1.4.22) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+* use addInstructions before queryIntentServices for MATCH_ALL injection (not between invoke and move-result) ([fddc3a9](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/fddc3a98d531775a5012559898ba449ccd26d7fc))
+
 ## [1.4.21](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.20...v1.4.21) (2026-09-30)
 
 ### 🐛 Bug Fixes
