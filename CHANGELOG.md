@@ -1,3 +1,9 @@
+## [1.4.25](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.24...v1.4.25) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+* remove non-public field access on bwyf to prevent VerifyError crash ([eac7ebe](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/eac7ebe51a9981afce8af1a092e9337a334ba4cb))
+
 ## [1.4.24](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.23...v1.4.24) (2026-09-30)
 
 ### 🐛 Bug Fixes

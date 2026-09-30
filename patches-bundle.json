@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-30T08:14:40",
-  "description": "## [1.4.24](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.23...v1.4.24) (2026-09-30)\n\n### 🐛 Bug Fixes\n\n* direct injection of Morphe YT Music ResolveInfo fallback into media providers map ([210b0d9](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/210b0d92fd591b6f59db6ef944c13a242cb2350d))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.24/patches-1.4.24.mpp",
+  "created_at": "2026-09-30T08:30:45",
+  "description": "## [1.4.25](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.24...v1.4.25) (2026-09-30)\n\n### 🐛 Bug Fixes\n\n* remove non-public field access on bwyf to prevent VerifyError crash ([eac7ebe](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/eac7ebe51a9981afce8af1a092e9337a334ba4cb))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.25/patches-1.4.25.mpp",
   "signature_download_url": "",
-  "version": "1.4.24"
+  "version": "1.4.25"
 }
