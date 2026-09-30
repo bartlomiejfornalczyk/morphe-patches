@@ -1,3 +1,9 @@
+## [1.4.20](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.19...v1.4.20) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+* correct const/high16 literal to 0x20000 (full 32-bit value, not raw high-word 0x0002) ([d8edc78](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/d8edc783acd7fe2c91241f1c94cf123d8c37e334))
+
 ## [1.4.19](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.18...v1.4.19) (2026-09-29)
 
 ### 🐛 Bug Fixes
