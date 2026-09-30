@@ -1,3 +1,9 @@
+## [1.4.26](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.25...v1.4.26) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+* prevent duplicate key and empty root crashes when selecting media provider ([3d733b1](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/3d733b1e87dfb75497e22f63544b29b2a31e62e9))
+
 ## [1.4.25](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.24...v1.4.25) (2026-09-30)
 
 ### 🐛 Bug Fixes
