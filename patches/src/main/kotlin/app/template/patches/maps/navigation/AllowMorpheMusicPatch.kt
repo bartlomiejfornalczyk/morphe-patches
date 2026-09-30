@@ -1,5 +1,6 @@
 package app.template.patches.maps.navigation
 
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
@@ -166,30 +167,21 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2g. Inject MATCH_ALL (0x20000) into queryIntentServices flags WITHOUT expanding the method.
+        // 2g. Inject MATCH_ALL (0x20000) flag into queryIntentServices.
         //
-        // Strategy: Replace the CHECK_CAST instruction 3 slots before queryIntentServices with
-        // "const/high16 v{flagsReg}, 0x0002" (= 0x0002 << 16 = 0x20000 = MATCH_ALL).
-        //
-        // Both CHECK_CAST and const/high16 are format-21c/21h = 4 bytes each → EXACT same size.
-        // Method bytes are unchanged → no branch offset recalculation needed → no startup crash.
-        //
-        // Skipping CHECK_CAST is safe: v0 holds an nxb object loaded by the IGET_OBJECT
-        // immediately before CHECK_CAST; the cast was just a type assertion, never needed at runtime.
+        // Safe insertion point: addInstructions BEFORE the invoke-virtual.
+        // The move-result-object that follows the invoke still immediately follows it → no Dalvik violation.
+        // (Previous crashes were from inserting BETWEEN invoke and move-result, NOT from addInstructions itself.)
         for (i in ytmIndex until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
             if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.name == "queryIntentServices" } == true) {
                 val invokeInsn = insn as com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
                 val flagsReg = invokeInsn.registerE
-                // CHECK_CAST is exactly 3 instructions before queryIntentServices
-                val checkCastIndex = i - 3
-                val checkCastInsn = impl.instructions.elementAt(checkCastIndex)
-                if (checkCastInsn.opcode == Opcode.CHECK_CAST) {
-                    // const/high16 vX, 0x20000 → vX = 0x20000 (MATCH_ALL flag)
-                    // Full 32-bit value required: 0x20000 = 0x00020000, low 16 bits = 0 ✓
-                    // Same 4-byte size as CHECK_CAST → method unchanged → no startup crash
-                    method.replaceInstruction(checkCastIndex, "const/high16 v$flagsReg, 0x20000")
-                }
+                // Insert BEFORE the invoke. After insertion:
+                //   [Q]   const v{flagsReg}, 0x20000
+                //   [Q+1] invoke-virtual queryIntentServices   ← still correct
+                //   [Q+2] move-result-object v0                ← still immediately after invoke ✓
+                method.addInstructions(i, "const v$flagsReg, 0x20000")
                 break
             }
         }
