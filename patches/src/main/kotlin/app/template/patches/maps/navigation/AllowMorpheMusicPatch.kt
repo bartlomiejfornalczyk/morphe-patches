@@ -205,27 +205,10 @@ val allowMorpheMusicPatch = bytecodePatch(
             // Replace invoke-virtual Lbwyf;->d(Z) with the first instruction so that any
             // branch jumping to dIndex (such as the if-eqz when queryIntentServices returns empty)
             // jumps directly to our fallback injection logic.
-            val firstSmali = "iget v3, v$builderReg, Lbwyf;->b:I"
+            val firstSmali = "new-instance v3, Landroid/content/pm/ResolveInfo;"
             method.replaceInstruction(dIndex, firstSmali)
 
             val fallbackSmali = """
-                if-eqz v3, :cond_morphe_inject
-                iget-object v4, v$builderReg, Lbwyf;->a:[Ljava/lang/Object;
-                const/4 v5, 0x0
-                :morphe_loop
-                if-ge v5, v3, :cond_morphe_inject
-                add-int v7, v5, v5
-                aget-object v7, v4, v7
-                check-cast v7, Lampc;
-                iget-object v7, v7, Lampc;->a:Ljava/lang/String;
-                const-string v8, "$targetPackage"
-                invoke-virtual {v7, v8}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-                move-result v7
-                if-nez v7, :cond_morphe_skip
-                add-int/lit8 v5, v5, 0x1
-                goto :morphe_loop
-                :cond_morphe_inject
-                new-instance v3, Landroid/content/pm/ResolveInfo;
                 invoke-direct {v3}, Landroid/content/pm/ResolveInfo;-><init>()V
                 new-instance v4, Landroid/content/pm/ServiceInfo;
                 invoke-direct {v4}, Landroid/content/pm/ServiceInfo;-><init>()V
@@ -240,7 +223,6 @@ val allowMorpheMusicPatch = bytecodePatch(
                 const-string v8, "$targetPackage"
                 invoke-direct {v4, v8, v5, v7}, Lampc;-><init>(Ljava/lang/String;II)V
                 invoke-virtual {v$builderReg, v4, v3}, Lbwyf;->e(Ljava/lang/Object;Ljava/lang/Object;)V
-                :cond_morphe_skip
                 invoke-virtual {v$builderReg, v$flagReg}, Lbwyf;->d(Z)Lbwyj;
             """.trimIndent()
             method.addInstructions(dIndex + 1, fallbackSmali)
