@@ -24,10 +24,13 @@ val allowMorpheMusicManifestPatch = resourcePatch(
     execute {
         document("AndroidManifest.xml").use { doc ->
             val manifest = doc.documentElement
+            val androidNs = "http://schemas.android.com/apk/res/android"
 
             // 1. Grant QUERY_ALL_PACKAGES so Android OS never hides any media apps
-            val queryAllPerm = doc.createElement("uses-permission")
-            queryAllPerm.setAttribute("android:name", "android.permission.QUERY_ALL_PACKAGES")
+            val queryAllPerm = doc.createElement("uses-permission").apply {
+                setAttribute("android:name", "android.permission.QUERY_ALL_PACKAGES")
+                setAttributeNS(androidNs, "android:name", "android.permission.QUERY_ALL_PACKAGES")
+            }
             manifest.appendChild(queryAllPerm)
 
             // 2. Add queries for all YouTube Music variants + generic MediaBrowserService intent
@@ -49,15 +52,19 @@ val allowMorpheMusicManifestPatch = resourcePatch(
             )
 
             for (pkg in packagesToAdd) {
-                val pkgElement = doc.createElement("package")
-                pkgElement.setAttribute("android:name", pkg)
+                val pkgElement = doc.createElement("package").apply {
+                    setAttribute("android:name", pkg)
+                    setAttributeNS(androidNs, "android:name", pkg)
+                }
                 queries.appendChild(pkgElement)
             }
 
             // Also add generic MediaBrowserService intent filter query
             val intentElem = doc.createElement("intent")
-            val actionElem = doc.createElement("action")
-            actionElem.setAttribute("android:name", "android.media.browse.MediaBrowserService")
+            val actionElem = doc.createElement("action").apply {
+                setAttribute("android:name", "android.media.browse.MediaBrowserService")
+                setAttributeNS(androidNs, "android:name", "android.media.browse.MediaBrowserService")
+            }
             intentElem.appendChild(actionElem)
             queries.appendChild(intentElem)
         }
@@ -167,7 +174,26 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2g. Inject MATCH_ALL (0x20000) flag into queryIntentServices.
+        // 2g. Set explicit package on MediaBrowserService Intent.
+        // On Android 11+ (API 30+) and especially Android 14/16, implicit queryIntentServices queries
+        // without an explicit package return empty due to package visibility restrictions.
+        // Calling intent.setPackage("$targetPackage") turns this into an explicit query targeting Morphe YT Music.
+        for (i in ytmIndex until impl.instructions.count()) {
+            val insn = impl.instructions.elementAt(i)
+            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? MethodReference)?.definingClass == "Landroid/content/Intent;" && (it as? MethodReference)?.name == "<init>" } == true) {
+                val intentReg = (insn as com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction).registerC
+                method.addInstructions(
+                    i + 1,
+                    """
+                    const-string v4, "$targetPackage"
+                    invoke-virtual {v$intentReg, v4}, Landroid/content/Intent;->setPackage(Ljava/lang/String;)Landroid/content/Intent;
+                    """.trimIndent()
+                )
+                break
+            }
+        }
+
+        // 2h. Inject MATCH_ALL (0x20000) flag into queryIntentServices.
         //
         // Safe insertion point: addInstructions BEFORE the invoke-virtual.
         // The move-result-object that follows the invoke still immediately follows it → no Dalvik violation.
