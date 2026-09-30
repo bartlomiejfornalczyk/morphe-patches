@@ -176,10 +176,11 @@ val allowMorpheMusicPatch = bytecodePatch(
         }
 
         // 2g. Inject Morphe YT Music ResolveInfo fallback into the media providers map (bwyf).
-        // On modern Android (API 30+, especially Android 14/15/16), queryIntentServices returns
-        // empty for non-system/untrusted packages even with package visibility granted.
-        // If queryIntentServices did not populate Morphe YT Music into the builder (v1),
-        // we directly create the ResolveInfo + ServiceInfo + ampc entry and insert it into bwyf.
+        // If queryIntentServices returns Morphe YT Music, it is added to the builder in the loop.
+        // If it was already added, adding it again causes Guava's ImmutableMap.Builder to throw
+        // an IllegalArgumentException (duplicate key error).
+        // We track whether targetPackage was added with a register flag (v10). If not added,
+        // we inject a complete ResolveInfo (with ApplicationInfo and exported=true) at the end.
         val queryIntentIndex = impl.instructions.indexOfFirst { insn ->
             (insn as? ReferenceInstruction)?.reference?.let {
                 (it as? MethodReference)?.name == "queryIntentServices"
@@ -197,25 +198,44 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        if (dIndex != -1) {
+        var eIndex = -1
+        for (i in queryIntentIndex until dIndex) {
+            val insn = impl.instructions.elementAt(i)
+            if ((insn as? ReferenceInstruction)?.reference?.let {
+                (it as? MethodReference)?.definingClass == "Lbwyf;" && (it as? MethodReference)?.name == "e"
+            } == true) {
+                eIndex = i
+                break
+            }
+        }
+
+        if (dIndex != -1 && eIndex != -1 && queryIntentIndex != -1) {
             val invokeInsn = impl.instructions.elementAt(dIndex) as FiveRegisterInstruction
             val builderReg = invokeInsn.registerC
             val flagReg = invokeInsn.registerD
 
-            // Replace invoke-virtual Lbwyf;->d(Z) with the first instruction so that any
-            // branch jumping to dIndex (such as the if-eqz when queryIntentServices returns empty)
-            // jumps directly to our fallback injection logic.
-            val firstSmali = "new-instance v3, Landroid/content/pm/ResolveInfo;"
-            method.replaceInstruction(dIndex, firstSmali)
+            // Work from highest index to lowest index so instruction additions don't shift earlier indices!
+
+            // 1. Replace builder.d(Z) with nop, followed by conditional fallback insertion
+            method.replaceInstruction(dIndex, "nop")
 
             val fallbackSmali = """
+                if-nez v10, :cond_morphe_skip
+                new-instance v3, Landroid/content/pm/ResolveInfo;
                 invoke-direct {v3}, Landroid/content/pm/ResolveInfo;-><init>()V
                 new-instance v4, Landroid/content/pm/ServiceInfo;
                 invoke-direct {v4}, Landroid/content/pm/ServiceInfo;-><init>()V
                 const-string v5, "$targetPackage"
                 iput-object v5, v4, Landroid/content/pm/ServiceInfo;->packageName:Ljava/lang/String;
-                const-string v5, "com.google.android.apps.youtube.music.mediabrowser.MusicBrowserService"
-                iput-object v5, v4, Landroid/content/pm/ServiceInfo;->name:Ljava/lang/String;
+                const-string v7, "com.google.android.apps.youtube.music.mediabrowser.MusicBrowserService"
+                iput-object v7, v4, Landroid/content/pm/ServiceInfo;->name:Ljava/lang/String;
+                new-instance v7, Landroid/content/pm/ApplicationInfo;
+                invoke-direct {v7}, Landroid/content/pm/ApplicationInfo;-><init>()V
+                iput-object v5, v7, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
+                iput-object v7, v4, Landroid/content/pm/ServiceInfo;->applicationInfo:Landroid/content/pm/ApplicationInfo;
+                const/4 v7, 0x1
+                iput-boolean v7, v4, Landroid/content/pm/ServiceInfo;->exported:Z
+                iput-object v5, v4, Landroid/content/pm/ServiceInfo;->processName:Ljava/lang/String;
                 iput-object v4, v3, Landroid/content/pm/ResolveInfo;->serviceInfo:Landroid/content/pm/ServiceInfo;
                 new-instance v4, Lampc;
                 const v5, 0x7f060d3c
@@ -223,22 +243,52 @@ val allowMorpheMusicPatch = bytecodePatch(
                 const-string v8, "$targetPackage"
                 invoke-direct {v4, v8, v5, v7}, Lampc;-><init>(Ljava/lang/String;II)V
                 invoke-virtual {v$builderReg, v4, v3}, Lbwyf;->e(Ljava/lang/Object;Ljava/lang/Object;)V
+                :cond_morphe_skip
                 invoke-virtual {v$builderReg, v$flagReg}, Lbwyf;->d(Z)Lbwyj;
             """.trimIndent()
             method.addInstructions(dIndex + 1, fallbackSmali)
+
+            // 2. Right after builder.e(ampc, resolveInfo) in the loop, check if targetPackage was added
+            val checkSmali = """
+                const-string v9, "$targetPackage"
+                invoke-virtual {v8, v9}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                move-result v9
+                if-nez v9, :cond_set_flag
+                const-string v9, "$altPackage"
+                invoke-virtual {v8, v9}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                move-result v9
+                if-eqz v9, :cond_morphe_found
+                :cond_set_flag
+                const/4 v10, 0x1
+                :cond_morphe_found
+            """.trimIndent()
+            method.addInstructions(eIndex + 1, checkSmali)
+
+            // 3. Initialize v10 = 0 before queryIntentServices
+            method.addInstructions(queryIntentIndex, "const/4 v10, 0x0")
         }
 
-        // 3. Patch bsma.a() - replace "com.google.android.apps.youtube.music" in the
-        //    trusted media app allowlist so Maps accepts Morphe YT Music connections.
-        val bsmaMethod = BsmaTrustedAppsFingerprint.method
-        val bsmaImpl = bsmaMethod.implementation!!
-        for (i in 0 until bsmaImpl.instructions.count()) {
-            val insn = bsmaImpl.instructions.elementAt(i)
-            if ((insn as? ReferenceInstruction)?.reference?.let { (it as? StringReference)?.string == "com.google.android.apps.youtube.music" } == true) {
-                val reg = (insn as OneRegisterInstruction).registerA
-                bsmaMethod.replaceInstruction(i, "const-string v$reg, \"$targetPackage\"")
-                break
-            }
+        // 3. Patch bog.n() so it handles null/empty root from MediaBrowser gracefully
+        //    without throwing IllegalArgumentException: "parentId is empty"
+        val subscribeMethod = MediaBrowserSubscribeFingerprint.method
+        val subscribeImpl = subscribeMethod.implementation!!
+
+        val getRootIndex = subscribeImpl.instructions.indexOfFirst { insn ->
+            (insn as? ReferenceInstruction)?.reference?.let {
+                (it as? MethodReference)?.definingClass == "Landroid/media/browse/MediaBrowser;" &&
+                    (it as? MethodReference)?.name == "getRoot"
+            } == true
+        }
+
+        if (getRootIndex != -1) {
+            val guardSmali = """
+                invoke-static {v2}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
+                move-result v3
+                if-eqz v3, :cond_has_root
+                return-void
+                :cond_has_root
+            """.trimIndent()
+            subscribeMethod.addInstructions(getRootIndex + 2, guardSmali)
         }
     }
 }

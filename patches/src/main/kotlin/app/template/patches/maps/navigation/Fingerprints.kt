@@ -1,6 +1,7 @@
 package app.template.patches.maps.navigation
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.string
 
 /**
@@ -28,13 +29,15 @@ object MediaControllerFingerprint : Fingerprint(
 )
 
 /**
- * Fingerprint matching bsma.a() - the trusted media app allowlist in classes2.dex.
- * Strings appear in bytecode order: mango[18] → music[19] → unplugged[20].
+ * Fingerprint matching the media browser subscription callback (bog.n()).
+ * Calls MediaBrowser.getRoot() to subscribe to media items.
  */
-object BsmaTrustedAppsFingerprint : Fingerprint(
+object MediaBrowserSubscribeFingerprint : Fingerprint(
+    returnType = "V",
     filters = listOf(
-        string("com.google.android.apps.youtube.mango"),
-        string("com.google.android.apps.youtube.music"),
-        string("com.google.android.apps.youtube.unplugged")
+        methodCall(
+            definingClass = "Landroid/media/browse/MediaBrowser;",
+            name = "getRoot"
+        )
     )
 )
