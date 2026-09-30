@@ -185,9 +185,10 @@ val allowMorpheMusicPatch = bytecodePatch(
                 val checkCastIndex = i - 3
                 val checkCastInsn = impl.instructions.elementAt(checkCastIndex)
                 if (checkCastInsn.opcode == Opcode.CHECK_CAST) {
-                    // const/high16 vX, 0x0002  → vX = 0x0002 << 16 = 0x20000 (MATCH_ALL)
-                    // 4 bytes exactly like CHECK_CAST, method size unchanged
-                    method.replaceInstruction(checkCastIndex, "const/high16 v$flagsReg, 0x0002")
+                    // const/high16 vX, 0x20000 → vX = 0x20000 (MATCH_ALL flag)
+                    // Full 32-bit value required: 0x20000 = 0x00020000, low 16 bits = 0 ✓
+                    // Same 4-byte size as CHECK_CAST → method unchanged → no startup crash
+                    method.replaceInstruction(checkCastIndex, "const/high16 v$flagsReg, 0x20000")
                 }
                 break
             }
