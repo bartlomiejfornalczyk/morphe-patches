@@ -1,3 +1,9 @@
+## [1.4.21](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.20...v1.4.21) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+* correct BsmaTrustedAppsFingerprint filter order to match bytecode order (mango[18] before music[19]) ([9860c7f](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/9860c7ff3955e8cc7b33f81434f45823553a284a))
+
 ## [1.4.20](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.19...v1.4.20) (2026-09-30)
 
 ### 🐛 Bug Fixes
