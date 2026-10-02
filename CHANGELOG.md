@@ -1,3 +1,9 @@
+## [1.4.28](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.27...v1.4.28) (2026-10-02)
+
+### 🐛 Bug Fixes
+
+* restore flag register and guard against empty root in media browser ([8459fb4](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/8459fb461595aeaa2a2cc8b21d20b3f8413cd941))
+
 ## [1.4.27](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.26...v1.4.27) (2026-09-30)
 
 ### 🐛 Bug Fixes
