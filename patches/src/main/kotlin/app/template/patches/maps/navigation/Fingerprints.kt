@@ -43,3 +43,17 @@ object MediaBrowserSubscribeFingerprint : Fingerprint(
     )
 )
 
+/**
+ * Fingerprint matching the candidate media provider verifier (ampe.a(apxs) in classes6.dex).
+ * Matches class containing amph and AtomicBoolean fields with method a taking 1 parameter returning void.
+ * Allows bypassing the asynchronous MediaBrowser test connection that silently drops third-party media apps.
+ */
+object MediaProviderVerifyFingerprint : Fingerprint(
+    returnType = "V",
+    custom = { method, classDef ->
+        classDef.fields.any { it.type == "Lamph;" } &&
+            classDef.fields.any { it.type == "Ljava/util/concurrent/atomic/AtomicBoolean;" } &&
+            method.name == "a" && method.parameters.size == 1
+    }
+)
+
