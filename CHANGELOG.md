@@ -1,3 +1,9 @@
+## [1.4.30](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.29...v1.4.30) (2026-10-02)
+
+### 🐛 Bug Fixes
+
+* bypass media provider test connection and inject match-all flag ([c6bdabb](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/c6bdabba5de6f88ed04ac2c483b8602dcfd24b93))
+
 ## [1.4.29](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.28...v1.4.29) (2026-10-02)
 
 ### 🐛 Bug Fixes
