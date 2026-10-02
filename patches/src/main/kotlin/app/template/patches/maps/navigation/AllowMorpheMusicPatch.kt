@@ -8,7 +8,6 @@ import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringOption
 import app.template.patches.shared.Constants.COMPATIBILITY_GOOGLE_MAPS
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -175,66 +174,6 @@ val allowMorpheMusicPatch = bytecodePatch(
             }
         }
 
-        // 2g. Inject Morphe YT Music ResolveInfo fallback into the media providers map (bwyf).
-        // On modern Android (API 30+, Android 14/15/16), queryIntentServices returns empty
-        // for non-system/untrusted packages even with package visibility granted.
-        // We inject a complete ResolveInfo (with valid ApplicationInfo, exported=true, processName)
-        // and call bwyf.d(false) to gracefully suppress duplicate key exceptions if already present.
-        val queryIntentIndex = impl.instructions.indexOfFirst { insn ->
-            (insn as? ReferenceInstruction)?.reference?.let {
-                (it as? MethodReference)?.name == "queryIntentServices"
-            } == true
-        }
-
-        var dIndex = -1
-        for (i in queryIntentIndex until impl.instructions.count()) {
-            val insn = impl.instructions.elementAt(i)
-            if ((insn as? ReferenceInstruction)?.reference?.let {
-                (it as? MethodReference)?.definingClass == "Lbwyf;" && (it as? MethodReference)?.name == "d"
-            } == true) {
-                dIndex = i
-                break
-            }
-        }
-
-        if (dIndex != -1) {
-            val invokeInsn = impl.instructions.elementAt(dIndex) as FiveRegisterInstruction
-            val builderReg = invokeInsn.registerC
-            val flagReg = invokeInsn.registerD
-
-            // Replace invoke-virtual Lbwyf;->d(Z) with the first instruction so that any
-            // branch jumping to dIndex (such as the if-eqz when queryIntentServices returns empty)
-            // jumps directly to our fallback injection logic without shifting loop branch offsets.
-            val firstSmali = "new-instance v3, Landroid/content/pm/ResolveInfo;"
-            method.replaceInstruction(dIndex, firstSmali)
-
-            val fallbackSmali = """
-                invoke-direct {v3}, Landroid/content/pm/ResolveInfo;-><init>()V
-                new-instance v4, Landroid/content/pm/ServiceInfo;
-                invoke-direct {v4}, Landroid/content/pm/ServiceInfo;-><init>()V
-                const-string v5, "$targetPackage"
-                iput-object v5, v4, Landroid/content/pm/ServiceInfo;->packageName:Ljava/lang/String;
-                const-string v5, "com.google.android.apps.youtube.music.mediabrowser.MusicBrowserService"
-                iput-object v5, v4, Landroid/content/pm/ServiceInfo;->name:Ljava/lang/String;
-                new-instance v5, Landroid/content/pm/ApplicationInfo;
-                invoke-direct {v5}, Landroid/content/pm/ApplicationInfo;-><init>()V
-                const-string v7, "$targetPackage"
-                iput-object v7, v5, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
-                iput-object v5, v4, Landroid/content/pm/ServiceInfo;->applicationInfo:Landroid/content/pm/ApplicationInfo;
-                const/4 v5, 0x1
-                iput-boolean v5, v4, Landroid/content/pm/ServiceInfo;->exported:Z
-                iput-object v7, v4, Landroid/content/pm/ServiceInfo;->processName:Ljava/lang/String;
-                iput-object v4, v3, Landroid/content/pm/ResolveInfo;->serviceInfo:Landroid/content/pm/ServiceInfo;
-                new-instance v4, Lampc;
-                const v5, 0x7f060d3c
-                const v7, 0x7f060d3d
-                const-string v8, "$targetPackage"
-                invoke-direct {v4, v8, v5, v7}, Lampc;-><init>(Ljava/lang/String;II)V
-                invoke-virtual {v$builderReg, v4, v3}, Lbwyf;->e(Ljava/lang/Object;Ljava/lang/Object;)V
-                invoke-virtual {v$builderReg, v$flagReg}, Lbwyf;->d(Z)Lbwyj;
-            """.trimIndent()
-            method.addInstructions(dIndex + 1, fallbackSmali)
-        }
 
         // 3. Guard against empty parentId in MediaBrowser.subscribe (bog.n())
         // Third-party/modded MediaBrowserService might return empty/null root ID initially,
