@@ -200,6 +200,7 @@ val allowMorpheMusicPatch = bytecodePatch(
         if (dIndex != -1) {
             val invokeInsn = impl.instructions.elementAt(dIndex) as FiveRegisterInstruction
             val builderReg = invokeInsn.registerC
+            val flagReg = invokeInsn.registerD
 
             // Replace invoke-virtual Lbwyf;->d(Z) with the first instruction so that any
             // branch jumping to dIndex (such as the if-eqz when queryIntentServices returns empty)
@@ -230,10 +231,33 @@ val allowMorpheMusicPatch = bytecodePatch(
                 const-string v8, "$targetPackage"
                 invoke-direct {v4, v8, v5, v7}, Lampc;-><init>(Ljava/lang/String;II)V
                 invoke-virtual {v$builderReg, v4, v3}, Lbwyf;->e(Ljava/lang/Object;Ljava/lang/Object;)V
-                const/4 v5, 0x0
-                invoke-virtual {v$builderReg, v5}, Lbwyf;->d(Z)Lbwyj;
+                invoke-virtual {v$builderReg, v$flagReg}, Lbwyf;->d(Z)Lbwyj;
             """.trimIndent()
             method.addInstructions(dIndex + 1, fallbackSmali)
+        }
+
+        // 3. Guard against empty parentId in MediaBrowser.subscribe (bog.n())
+        // Third-party/modded MediaBrowserService might return empty/null root ID initially,
+        // which causes MediaBrowserCompat.subscribe to throw IllegalArgumentException: parentId is empty.
+        val subscribeMethod = MediaBrowserSubscribeFingerprint.method
+        val subscribeImpl = subscribeMethod.implementation
+        if (subscribeImpl != null) {
+            val getRootIndex = subscribeImpl.instructions.indexOfFirst { insn ->
+                (insn as? ReferenceInstruction)?.reference?.let {
+                    (it as? MethodReference)?.definingClass == "Landroid/media/browse/MediaBrowser;" &&
+                        (it as? MethodReference)?.name == "getRoot"
+                } == true
+            }
+            if (getRootIndex != -1) {
+                val guardSmali = """
+                    invoke-static {v2}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
+                    move-result v3
+                    if-eqz v3, :cond_has_root
+                    return-void
+                    :cond_has_root
+                """.trimIndent()
+                subscribeMethod.addInstructions(getRootIndex + 2, guardSmali)
+            }
         }
     }
 }

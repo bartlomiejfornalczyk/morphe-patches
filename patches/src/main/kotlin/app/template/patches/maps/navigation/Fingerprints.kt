@@ -1,6 +1,7 @@
 package app.template.patches.maps.navigation
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.string
 
 /**
@@ -24,6 +25,21 @@ object MediaControllerFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     filters = listOf(
         string("com.spotify.music")
+    )
+)
+
+/**
+ * Fingerprint matching the MediaBrowser connection callback in bog.n().
+ * Matches the method calling MediaBrowser.getRoot() returning void.
+ * Allows guarding against empty parentId before calling MediaBrowserCompat.subscribe().
+ */
+object MediaBrowserSubscribeFingerprint : Fingerprint(
+    returnType = "V",
+    filters = listOf(
+        methodCall(
+            definingClass = "Landroid/media/browse/MediaBrowser;",
+            name = "getRoot"
+        )
     )
 )
 
