@@ -1,3 +1,9 @@
+## [1.4.32](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.31...v1.4.32) (2026-10-03)
+
+### 🐛 Bug Fixes
+
+* add allow external media browser connections patch for YouTube Music ([1204a42](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/1204a423000b606cfafb5859782a9a6af2aa9df5))
+
 ## [1.4.31](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.30...v1.4.31) (2026-10-03)
 
 ### 🐛 Bug Fixes
