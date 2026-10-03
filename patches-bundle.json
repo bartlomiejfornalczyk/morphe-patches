@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-03T16:18:02",
-  "description": "## [1.4.33](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.32...v1.4.33) (2026-10-03)\n\n### 🐛 Bug Fixes\n\n* update allow external media browser connections patch with robust MusicBrowserService fingerprint ([6da0124](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6da01247e2de849402f6b20acb2cbdf14c0800fa))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.33/patches-1.4.33.mpp",
+  "created_at": "2026-10-03T16:28:04",
+  "description": "## [1.4.34](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.33...v1.4.34) (2026-10-03)\n\n### 🐛 Bug Fixes\n\n* precisely isolate allowlist manager to prevent corrupting runtime checks ([5932aff](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/5932aff784a0424492a45528213c9e67ae2eeb04))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.34/patches-1.4.34.mpp",
   "signature_download_url": "",
-  "version": "1.4.33"
+  "version": "1.4.34"
 }

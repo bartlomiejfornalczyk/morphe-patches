@@ -1,3 +1,9 @@
+## [1.4.34](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.33...v1.4.34) (2026-10-03)
+
+### 🐛 Bug Fixes
+
+* precisely isolate allowlist manager to prevent corrupting runtime checks ([5932aff](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/5932aff784a0424492a45528213c9e67ae2eeb04))
+
 ## [1.4.33](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.32...v1.4.33) (2026-10-03)
 
 ### 🐛 Bug Fixes
