@@ -1,3 +1,9 @@
+## [1.4.31](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.30...v1.4.31) (2026-10-03)
+
+### 🐛 Bug Fixes
+
+* resolve crash on start by reverting queryIntentServices edit and securing verify fingerprint ([bda9d45](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/bda9d45d5eff1a5b8bcd3f0754e2625711e01135))
+
 ## [1.4.30](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.29...v1.4.30) (2026-10-02)
 
 ### 🐛 Bug Fixes
