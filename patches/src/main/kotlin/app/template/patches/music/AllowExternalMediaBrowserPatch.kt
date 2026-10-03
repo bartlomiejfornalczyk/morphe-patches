@@ -39,17 +39,35 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
             ?: return@execute
 
         val impl = method.implementation ?: return@execute
-        val allowlistClassNames = mutableSetOf<String>()
 
-        // 1. In MusicBrowserService.onGetRoot:
-        // Force the results of all boolean verification checks (isAllowlistedForMediaBrowser, isBrowsable)
-        // to 1 (true) by replacing the move-result instruction following their invocation.
+        // 1. Locate the AllowlistManager class from onGetRoot.
+        // In YouTube Music, AllowlistManager is called with: (callerInfo, callerDetails, clientUid) -> boolean
+        // That is: 3 parameters ending in "I" (UID check) returning "Z" (boolean).
+        var allowlistClassName: String? = null
         for (i in 0 until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
             val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference
-            if (ref != null && ref.returnType == "Z") {
-                allowlistClassNames.add(ref.definingClass)
+            if (ref != null &&
+                ref.returnType == "Z" &&
+                ref.parameterTypes.size == 3 &&
+                ref.parameterTypes[2] == "I"
+            ) {
+                allowlistClassName = ref.definingClass
+                break
+            }
+        }
 
+        if (allowlistClassName == null) {
+            return@execute
+        }
+
+        // 2. In MusicBrowserService.onGetRoot:
+        // Replace move-result with const/4 vReg, 0x1 ONLY for calls on AllowlistManager.
+        // Do NOT touch other boolean checks (e.g. Android Auto car app checks, recents checks, etc.)
+        for (i in 0 until impl.instructions.count()) {
+            val insn = impl.instructions.elementAt(i)
+            val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference
+            if (ref != null && ref.definingClass == allowlistClassName && ref.returnType == "Z") {
                 if (i + 1 < impl.instructions.count()) {
                     val nextInsn = impl.instructions.elementAt(i + 1)
                     if (nextInsn.opcode == Opcode.MOVE_RESULT) {
@@ -60,21 +78,19 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
             }
         }
 
-        // 2. Also patch the AllowlistManager class directly:
-        // Force all its boolean methods (UID check, package name allowlist, browsable check, etc.)
-        // to return true (1).
-        for (className in allowlistClassNames) {
-            val allowlistClass = mutableClassDefByOrNull(className) ?: continue
-            for (m in allowlistClass.methods) {
-                if (m.returnType == "Z") {
-                    val totalInsn = m.implementation?.instructions?.count() ?: 0
-                    if (totalInsn >= 2) {
-                        for (idx in 2 until totalInsn) {
-                            m.replaceInstruction(idx, "nop")
-                        }
-                        m.replaceInstruction(0, "const/4 v0, 0x1")
-                        m.replaceInstruction(1, "return v0")
+        // 3. In AllowlistManager itself:
+        // Force all its boolean verification methods (isAllowlistedForMediaBrowser, isBrowsable,
+        // partner SHA checks, signature checks, etc.) to always return true (1).
+        val allowlistClass = mutableClassDefByOrNull(allowlistClassName) ?: return@execute
+        for (m in allowlistClass.methods) {
+            if (m.returnType == "Z") {
+                val totalInsn = m.implementation?.instructions?.count() ?: 0
+                if (totalInsn >= 2) {
+                    for (idx in 2 until totalInsn) {
+                        m.replaceInstruction(idx, "nop")
                     }
+                    m.replaceInstruction(0, "const/4 v0, 0x1")
+                    m.replaceInstruction(1, "return v0")
                 }
             }
         }
