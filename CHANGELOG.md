@@ -1,3 +1,9 @@
+## [1.4.35](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.34...v1.4.35) (2026-10-03)
+
+### 🐛 Bug Fixes
+
+* **music:** prevent VerifyError in AllowlistManager by safely replacing return values in-place (v1.4.35) ([a7a2f12](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/a7a2f12eb9653c3ee3ce07df46953b5f9075128b))
+
 ## [1.4.34](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.33...v1.4.34) (2026-10-03)
 
 ### 🐛 Bug Fixes
