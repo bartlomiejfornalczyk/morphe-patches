@@ -9,6 +9,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 @Suppress("unused")
 val allowExternalMediaBrowserPatch = bytecodePatch(
@@ -25,11 +26,13 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
     execute {
         val method = MusicBrowserServiceFingerprint.methodOrNull
             ?: classDefByOrNull { it.type.endsWith("/MusicBrowserService;") }
-                ?.methods?.firstOrNull {
-                    it.parameterTypes.size == 3 &&
-                        it.parameterTypes[0] == "Ljava/lang/String;" &&
-                        it.parameterTypes[1] == "I" &&
-                        it.parameterTypes[2] == "Landroid/os/Bundle;"
+                ?.methods?.firstOrNull { m ->
+                    val pCount = m.parameterTypes.size
+                    (pCount == 2 || pCount == 3) &&
+                        m.parameterTypes[0] == "Ljava/lang/String;" &&
+                        m.parameterTypes[pCount - 1] == "Landroid/os/Bundle;" &&
+                        m.returnType != "V" &&
+                        m.returnType != "I"
                 }
                 ?.let { fallbackMethod ->
                     mutableClassDefBy(fallbackMethod.definingClass).methods.first { m ->
@@ -40,29 +43,44 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
 
         val impl = method.implementation ?: return@execute
 
-        // 1. Discover the gatekeeper classes and methods called by onGetRoot:
-        // - AllowlistManager (gzj): called with (callerPackage, callerDetails, int clientUid) -> Z
-        // - callerDetails (yyx): 2nd parameter of AllowlistManager call; MUST be excluded from gate classes
-        //   so Android Auto / CarApp checks (yyx.equals) are preserved without triggering crashes.
-        // - Browsable method: method on AllowlistManager with (callerDetails) -> Z
-        // - Zero-arg gatekeeper classes (gzw, jff): zero-arg methods returning Z (entitlement and browse gates)
+        // 1. Locate the AllowlistManager class from onGetRoot:
+        // Find the index of string "Client not allowlisted" or "MBS: getRoot() failed."
+        var notAllowlistedIdx = -1
+        for (i in 0 until impl.instructions.count()) {
+            val insn = impl.instructions.elementAt(i)
+            val str = ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string
+            if (str != null && str.contains("Client not allowlisted")) {
+                notAllowlistedIdx = i
+                break
+            }
+        }
+
         var allowlistClassName: String? = null
         var callerDetailsClassName: String? = null
         var browsableMethodName: String? = null
         val zeroArgGateClasses = mutableSetOf<String>()
 
-        for (i in 0 until impl.instructions.count()) {
+        // Find the boolean method invocation before the "Client not allowlisted" log
+        val searchLimit = if (notAllowlistedIdx != -1) notAllowlistedIdx else impl.instructions.count()
+        for (i in 0 until searchLimit) {
             val insn = impl.instructions.elementAt(i)
             val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
-            if (ref.returnType == "Z") {
-                if (ref.parameterTypes.size == 3 && ref.parameterTypes[2] == "I") {
-                    allowlistClassName = ref.definingClass
-                    callerDetailsClassName = ref.parameterTypes[1].toString()
-                    break
+            if (ref.returnType == "Z" &&
+                ref.parameterTypes.isNotEmpty() &&
+                !ref.definingClass.startsWith("Ljava/") &&
+                !ref.definingClass.startsWith("Landroid/")
+            ) {
+                allowlistClassName = ref.definingClass
+                for (p in ref.parameterTypes) {
+                    val pStr = p.toString()
+                    if (pStr != "I" && pStr != "Ljava/lang/String;" && !pStr.startsWith("Landroid/")) {
+                        callerDetailsClassName = pStr
+                    }
                 }
             }
         }
 
+        // Find browsable method on AllowlistManager and all zero-arg gatekeeper classes
         for (i in 0 until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
             val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
@@ -101,8 +119,8 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
             }
         }
 
-        // 3. Patch the browsable method on AllowlistManager (gzj.h(yyx)) to always return true (1).
-        // This method has 0 try blocks and is called by onLoadChildren (gzw.c) and onSearch (gzw.d).
+        // 3. Patch the browsable method on AllowlistManager (gzj.h / kxo.h) to always return true (1).
+        // This method has 0 try blocks and is called by onLoadChildren and onSearch.
         if (allowlistClassName != null && browsableMethodName != null) {
             mutableClassDefByOrNull(allowlistClassName)?.let { allowClass ->
                 allowClass.methods.firstOrNull { it.name == browsableMethodName && it.returnType == "Z" }?.let { bMethod ->
@@ -119,10 +137,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
             }
         }
 
-        // 4. Patch zero-arg entitlement gate methods (gzw.g() and jff.D()) to always return true (1).
-        // CRITICAL: gzw.g() has 0 try blocks and normally calls gxr.c() on non-premium users, which
+        // 4. Patch zero-arg entitlement gate methods (gzw.g / kzf.g and jff.D / khr.e) to always return true (1).
+        // CRITICAL: Gatekeeper methods have 0 try blocks and normally call error reporting on non-premium users, which
         // pushes an error state (PlaybackState.STATE_ERROR = 7) onto the MediaSession, causing
-        // Google Maps to report "Unable to connect". Replacing its body with `return 1` prevents the
+        // Google Maps to report "Unable to connect". Replacing their bodies with `return 1` prevents the
         // error state from ever being set and unconditionally grants browsing access to Google Maps.
         for (gateClass in zeroArgGateClasses) {
             mutableClassDefByOrNull(gateClass)?.let { clazz ->
