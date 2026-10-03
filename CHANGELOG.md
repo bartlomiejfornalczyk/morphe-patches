@@ -1,3 +1,9 @@
+## [1.4.36](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.35...v1.4.36) (2026-10-03)
+
+### 🐛 Bug Fixes
+
+* **music:** bypass entitlement gate and session error state for media browser (v1.4.36) ([6a19ed8](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6a19ed8ab2db500fceb188d6b81dd35f34630cbc))
+
 ## [1.4.35](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.34...v1.4.35) (2026-10-03)
 
 ### 🐛 Bug Fixes
