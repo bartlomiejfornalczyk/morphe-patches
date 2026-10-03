@@ -40,34 +40,57 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
 
         val impl = method.implementation ?: return@execute
 
-        // 1. Locate the AllowlistManager class from onGetRoot.
-        // In YouTube Music, AllowlistManager is called with: (callerInfo, callerDetails, clientUid) -> boolean
-        // That is: 3 parameters ending in "I" (UID check) returning "Z" (boolean).
+        // 1. Discover the gatekeeper classes and methods called by onGetRoot:
+        // - AllowlistManager (gzj): called with (callerPackage, callerDetails, int clientUid) -> Z
+        // - callerDetails (yyx): 2nd parameter of AllowlistManager call; MUST be excluded from gate classes
+        //   so Android Auto / CarApp checks (yyx.equals) are preserved without triggering crashes.
+        // - Browsable method: method on AllowlistManager with (callerDetails) -> Z
+        // - Zero-arg gatekeeper classes (gzw, jff): zero-arg methods returning Z (entitlement and browse gates)
         var allowlistClassName: String? = null
+        var callerDetailsClassName: String? = null
+        var browsableMethodName: String? = null
+        val zeroArgGateClasses = mutableSetOf<String>()
+
         for (i in 0 until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
-            val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference
-            if (ref != null &&
-                ref.returnType == "Z" &&
-                ref.parameterTypes.size == 3 &&
-                ref.parameterTypes[2] == "I"
-            ) {
-                allowlistClassName = ref.definingClass
-                break
+            val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+            if (ref.returnType == "Z") {
+                if (ref.parameterTypes.size == 3 && ref.parameterTypes[2] == "I") {
+                    allowlistClassName = ref.definingClass
+                    callerDetailsClassName = ref.parameterTypes[1].toString()
+                    break
+                }
             }
         }
 
-        if (allowlistClassName == null) {
-            return@execute
+        for (i in 0 until impl.instructions.count()) {
+            val insn = impl.instructions.elementAt(i)
+            val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+            if (ref.returnType == "Z") {
+                if (ref.parameterTypes.isEmpty() &&
+                    !ref.definingClass.startsWith("Ljava/") &&
+                    !ref.definingClass.startsWith("Landroid/") &&
+                    !ref.definingClass.startsWith("Lj$/") &&
+                    ref.definingClass != callerDetailsClassName
+                ) {
+                    zeroArgGateClasses.add(ref.definingClass)
+                }
+                if (allowlistClassName != null && ref.definingClass == allowlistClassName && ref.parameterTypes.size == 1) {
+                    browsableMethodName = ref.name
+                }
+            }
         }
 
+        val targetClasses = mutableSetOf<String>()
+        if (allowlistClassName != null) targetClasses.add(allowlistClassName)
+        targetClasses.addAll(zeroArgGateClasses)
+
         // 2. In MusicBrowserService.onGetRoot:
-        // Replace move-result with const/4 vReg, 0x1 ONLY for calls on AllowlistManager.
-        // Do NOT touch other boolean checks (e.g. Android Auto car app checks, recents checks, etc.)
+        // Force the result of all allowlist, browsable, and entitlement checks to true (1).
         for (i in 0 until impl.instructions.count()) {
             val insn = impl.instructions.elementAt(i)
             val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference
-            if (ref != null && ref.definingClass == allowlistClassName && ref.returnType == "Z") {
+            if (ref != null && ref.definingClass in targetClasses && ref.returnType == "Z") {
                 if (i + 1 < impl.instructions.count()) {
                     val nextInsn = impl.instructions.elementAt(i + 1)
                     if (nextInsn.opcode == Opcode.MOVE_RESULT) {
@@ -78,29 +101,42 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
             }
         }
 
-        // 3. In AllowlistManager itself:
-        // Force all its boolean verification methods (isAllowlistedForMediaBrowser, isBrowsable,
-        // partner SHA checks, signature checks, etc.) to always return true (1).
-        // CRITICAL: Do NOT truncate method bodies or fill with nop, because methods containing
-        // try/catch blocks or monitor enter/exit will fail ART dex verification (VerifyError).
-        // Instead, safely replace MOVE_RESULT and CONST_4 #0 returning instructions in-place with 0x1.
-        val allowlistClass = mutableClassDefByOrNull(allowlistClassName) ?: return@execute
-        for (m in allowlistClass.methods) {
-            if (m.returnType == "Z") {
-                val mImpl = m.implementation ?: continue
-                val count = mImpl.instructions.count()
-                for (idx in 0 until count) {
-                    val insn = mImpl.instructions.elementAt(idx)
-                    if (insn.opcode == Opcode.MOVE_RESULT) {
-                        val reg = (insn as OneRegisterInstruction).registerA
-                        m.replaceInstruction(idx, "const/4 v$reg, 0x1")
-                    } else if (insn.opcode == Opcode.CONST_4) {
-                        val lit = (insn as? com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction)?.narrowLiteral ?: continue
-                        if (lit == 0 && idx + 1 < count) {
-                            val nextInsn = mImpl.instructions.elementAt(idx + 1)
-                            if (nextInsn.opcode == Opcode.RETURN) {
-                                val reg = (insn as OneRegisterInstruction).registerA
-                                m.replaceInstruction(idx, "const/4 v$reg, 0x1")
+        // 3. Patch the browsable method on AllowlistManager (gzj.h(yyx)) to always return true (1).
+        // This method has 0 try blocks and is called by onLoadChildren (gzw.c) and onSearch (gzw.d).
+        if (allowlistClassName != null && browsableMethodName != null) {
+            mutableClassDefByOrNull(allowlistClassName)?.let { allowClass ->
+                allowClass.methods.firstOrNull { it.name == browsableMethodName && it.returnType == "Z" }?.let { bMethod ->
+                    val bImpl = bMethod.implementation
+                    if (bImpl != null && bImpl.tryBlocks.isEmpty()) {
+                        val count = bImpl.instructions.count()
+                        bMethod.replaceInstruction(0, "const/4 v0, 0x1")
+                        bMethod.replaceInstruction(1, "return v0")
+                        for (idx in 2 until count) {
+                            bMethod.replaceInstruction(idx, "nop")
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Patch zero-arg entitlement gate methods (gzw.g() and jff.D()) to always return true (1).
+        // CRITICAL: gzw.g() has 0 try blocks and normally calls gxr.c() on non-premium users, which
+        // pushes an error state (PlaybackState.STATE_ERROR = 7) onto the MediaSession, causing
+        // Google Maps to report "Unable to connect". Replacing its body with `return 1` prevents the
+        // error state from ever being set and unconditionally grants browsing access to Google Maps.
+        for (gateClass in zeroArgGateClasses) {
+            mutableClassDefByOrNull(gateClass)?.let { clazz ->
+                for (m in clazz.methods) {
+                    if (m.returnType == "Z" && m.parameterTypes.isEmpty()) {
+                        val mImpl = m.implementation ?: continue
+                        if (mImpl.tryBlocks.isEmpty()) {
+                            val count = mImpl.instructions.count()
+                            if (count >= 2) {
+                                m.replaceInstruction(0, "const/4 v0, 0x1")
+                                m.replaceInstruction(1, "return v0")
+                                for (idx in 2 until count) {
+                                    m.replaceInstruction(idx, "nop")
+                                }
                             }
                         }
                     }
