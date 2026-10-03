@@ -1,3 +1,9 @@
+## [1.4.33](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.32...v1.4.33) (2026-10-03)
+
+### 🐛 Bug Fixes
+
+* update allow external media browser connections patch with robust MusicBrowserService fingerprint ([6da0124](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6da01247e2de849402f6b20acb2cbdf14c0800fa))
+
 ## [1.4.32](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.31...v1.4.32) (2026-10-03)
 
 ### 🐛 Bug Fixes
