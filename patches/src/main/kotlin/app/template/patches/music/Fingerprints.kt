@@ -1,15 +1,13 @@
 package app.template.patches.music
 
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.string
 
 /**
- * Matches AllowlistManager in YouTube Music's MediaBrowser implementation.
- * Method g is isAllowlistedForMediaBrowser which verifies if the connecting client is allowed.
+ * Matches MusicBrowserService.onGetRoot in YouTube Music.
+ * MusicBrowserService is declared in AndroidManifest.xml and is never obfuscated.
+ * onGetRoot is the entry point that authenticates connecting media clients (e.g. Google Maps, Android Auto).
  */
-object AllowlistManagerFingerprint : Fingerprint(
-    returnType = "Z",
-    filters = listOf(
-        string("isAllowlistedForMediaBrowser failed UID check. Package: %s, UID: %d")
-    )
+object MusicBrowserServiceFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/apps/youtube/music/mediabrowser/MusicBrowserService;",
+    parameters = listOf("Ljava/lang/String;", "I", "Landroid/os/Bundle;")
 )
