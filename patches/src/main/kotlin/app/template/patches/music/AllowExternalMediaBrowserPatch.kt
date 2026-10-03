@@ -81,16 +81,29 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
         // 3. In AllowlistManager itself:
         // Force all its boolean verification methods (isAllowlistedForMediaBrowser, isBrowsable,
         // partner SHA checks, signature checks, etc.) to always return true (1).
+        // CRITICAL: Do NOT truncate method bodies or fill with nop, because methods containing
+        // try/catch blocks or monitor enter/exit will fail ART dex verification (VerifyError).
+        // Instead, safely replace MOVE_RESULT and CONST_4 #0 returning instructions in-place with 0x1.
         val allowlistClass = mutableClassDefByOrNull(allowlistClassName) ?: return@execute
         for (m in allowlistClass.methods) {
             if (m.returnType == "Z") {
-                val totalInsn = m.implementation?.instructions?.count() ?: 0
-                if (totalInsn >= 2) {
-                    for (idx in 2 until totalInsn) {
-                        m.replaceInstruction(idx, "nop")
+                val mImpl = m.implementation ?: continue
+                val count = mImpl.instructions.count()
+                for (idx in 0 until count) {
+                    val insn = mImpl.instructions.elementAt(idx)
+                    if (insn.opcode == Opcode.MOVE_RESULT) {
+                        val reg = (insn as OneRegisterInstruction).registerA
+                        m.replaceInstruction(idx, "const/4 v$reg, 0x1")
+                    } else if (insn.opcode == Opcode.CONST_4) {
+                        val lit = (insn as? com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction)?.narrowLiteral ?: continue
+                        if (lit == 0 && idx + 1 < count) {
+                            val nextInsn = mImpl.instructions.elementAt(idx + 1)
+                            if (nextInsn.opcode == Opcode.RETURN) {
+                                val reg = (insn as OneRegisterInstruction).registerA
+                                m.replaceInstruction(idx, "const/4 v$reg, 0x1")
+                            }
+                        }
                     }
-                    m.replaceInstruction(0, "const/4 v0, 0x1")
-                    m.replaceInstruction(1, "return v0")
                 }
             }
         }
