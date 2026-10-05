@@ -1,21 +1,23 @@
-# 👋🧩 Morphe Patches template
+# 🗺️🎵 Google Maps & YouTube Music Morphe Patches
 
-WIP Don't download. Nothing is working yet.
+Custom Morphe patches enabling seamless YouTube Music mini-player integration directly inside Google Maps navigation, alongside package renaming and map data restoration.
 
 ## ❓ About
 
-Patches for apps I like.
-
-<!-- TODO: Update this about section with a brief introduction/summary about this repo and what it offers. -->
+This patch bundle provides:
+- **YouTube Music Mini Player in Google Maps**: Allows modded/re-signed YouTube Music apps (standard, Morphe, or ReVanced) to connect to Google Maps as the active media provider.
+- **External Media Browser Connections**: Unlocks YouTube Music's MediaBrowserService entitlement gate and whitelist so Google Maps, Android Auto, and external controllers can browse and play media.
+- **Package Renaming & Data Restoration**: Lets Google Maps run alongside the stock app with its own package name while keeping maps tile loading, search, and routing working.
 
 ### How to use these patches
 
-Click here to add these patches to Morphe: https://morphe.software/add-source?github=bartlomiejfornalczyk/morphe-patches
+Add this repository as a custom source in Morphe Manager:
+`https://github.com/bartlomiejfornalczyk/morphe-patches`
 
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.4.37](https://github.com/bartlomiejfornalczyk/morphe-patches/releases/tag/v1.4.37)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;7 patches total
+> **[v1.0.0](https://github.com/bartlomiejfornalczyk/morphe-patches/releases/tag/v1.0.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;7 patches total
 <details open>
 <summary>📦 Google Maps&nbsp;&nbsp;•&nbsp;&nbsp;4 patches</summary>
 <br>
@@ -76,5 +78,5 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 See the [Morphe documentation](https://github.com/MorpheApp/morphe-documentation) for more information.
 
 ## 📜 License
-
-UserXYZ Patches are licensed under the [GNU General Public License v3.0](LICENSE)
+ 
+Morphe Patches are licensed under the [GNU General Public License v3.0](LICENSE)
