@@ -10,7 +10,11 @@ This patch bundle provides:
 - **Package Renaming & Data Restoration**: Lets Google Maps run alongside the stock app with its own package name while keeping maps tile loading, search, and routing working.
 
 ### How to use these patches
+Install Morphe Manager if you have not yet: https://morphe.software
 
+[Click here to add bartlomiejfornalczyk patches to Morphe Manager](https://morphe.software/add-source?github=bartlomiejfornalczyk/morphe-patches)
+
+Select the app you want to patch inside Morphe Manager, follow all instructions shown.
 Add this repository as a custom source in Morphe Manager:
 `https://github.com/bartlomiejfornalczyk/morphe-patches`
 
