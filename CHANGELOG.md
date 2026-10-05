@@ -1,3 +1,9 @@
+## 1.0.0 (2026-10-05)
+
+### ✨ Initial Release
+
+* Initial release baseline based on v1.4.37 (YouTube Music & Google Maps media player integration).
+
 ## [1.4.37](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.36...v1.4.37) (2026-10-03)
 
 ### 🐛 Bug Fixes

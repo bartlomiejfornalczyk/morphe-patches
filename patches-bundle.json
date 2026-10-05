@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-03T22:00:24",
-  "description": "## [1.4.37](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.36...v1.4.37) (2026-10-03)\n\n### 🐛 Bug Fixes\n\n* **music:** support 2-parameter onGetRoot variant in newer YouTube Music versions (v1.4.37) ([88aa0ae](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/88aa0aebb6f19dfc53a3dd89df4bd14305ba928b))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.4.37/patches-1.4.37.mpp",
+  "created_at": "2026-10-05T21:45:00",
+  "description": "## 1.0.0 (2026-10-05)\n\n* Initial release based on v1.4.37.",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.0.0/patches-1.0.0.mpp",
   "signature_download_url": "",
-  "version": "1.4.37"
+  "version": "1.0.0"
 }
