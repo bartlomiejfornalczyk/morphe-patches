@@ -1,3 +1,9 @@
+## [1.1.0-dev.2](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.1...v1.1.0-dev.2) (2026-10-09)
+
+### ✨ New Features
+
+* rename bundle to Maps&Music patches and refine MicroG package metadata ([3ff06af](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/3ff06af9ac7afae974e47609ca34b9624840fbdf))
+
 ## [1.1.0-dev.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.0.1...v1.1.0-dev.1) (2026-10-09)
 
 ### 🐛 Bug Fixes
