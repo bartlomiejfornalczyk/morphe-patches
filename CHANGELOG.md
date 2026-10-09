@@ -1,3 +1,9 @@
+## [1.1.0-dev.4](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.3...v1.1.0-dev.4) (2026-10-09)
+
+### ✨ New Features
+
+* **maps:** add Remove telemetry and Remove permissions for Play Protect compliance bypass ([e7b4aa1](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/e7b4aa1185848a768f0b30f4397c24e89eb2ff35))
+
 ## [1.1.0-dev.3](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.2...v1.1.0-dev.3) (2026-10-09)
 
 ### ✨ New Features
