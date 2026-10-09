@@ -1,6 +1,6 @@
-# 🗺️🎵 Google Maps & YouTube Music Morphe Patches
+# 🗺️🎵 Maps&Music patches
 
-Custom Morphe patches enabling seamless YouTube Music mini-player integration directly inside Google Maps navigation, alongside package renaming and map data restoration.
+Custom Morphe patches enabling seamless YouTube Music mini-player integration directly inside Google Maps navigation, alongside package renaming, map data restoration, and microG support.
 
 ## ❓ About
 

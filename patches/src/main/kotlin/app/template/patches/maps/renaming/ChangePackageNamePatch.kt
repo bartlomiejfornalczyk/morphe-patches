@@ -88,18 +88,28 @@ val changePackageNamePatch = resourcePatch(
             }
             for (alias in manifest.elements("activity-alias")) rename(alias, "android:name", what = "activity-alias")
 
-            // Inject MicroG spoofing metadata tags so ReVanced MicroG knows the original package name and signature
+            // Inject MicroG spoofing metadata tags so ReVanced MicroG / GmsCore knows the original package name and signature
             val metaName = manifest.createElement("meta-data").apply {
                 setAttribute("android:name", "app.revanced.android.gms.SPOOFED_PACKAGE_NAME")
                 setAttribute("android:value", old)
             }
             val metaSig = manifest.createElement("meta-data").apply {
                 setAttribute("android:name", "app.revanced.android.gms.SPOOFED_PACKAGE_SIGNATURE")
-                setAttribute("android:value", GENUINE_CERT)
+                setAttribute("android:value", GENUINE_CERT.lowercase())
+            }
+            val metaPkg1 = manifest.createElement("meta-data").apply {
+                setAttribute("android:name", "app.revanced.MICROG_PACKAGE_NAME")
+                setAttribute("android:value", "app.revanced.android.gms")
+            }
+            val metaPkg2 = manifest.createElement("meta-data").apply {
+                setAttribute("android:name", "app.revanced.android.gms.MICROG_PACKAGE_NAME")
+                setAttribute("android:value", "app.revanced.android.gms")
             }
             application.appendChild(metaName)
             application.appendChild(metaSig)
-            counts["metadata"] = 2
+            application.appendChild(metaPkg1)
+            application.appendChild(metaPkg2)
+            counts["metadata"] = 4
         }
 
         val res = this["res"]
@@ -121,7 +131,7 @@ val changePackageNamePatch = resourcePatch(
         val expected = mapOf(
             "package" to 1, "android:sharedUserId" to 1, "permission" to 3, "uses-permission" to 1,
             "permission reference" to 2, "process" to 7, "authorities" to 9, "activity-alias" to 54,
-            "shortcut package" to 2, "shortcut class" to 2, "metadata" to 2
+            "shortcut package" to 2, "shortcut class" to 2, "metadata" to 4
         )
         val short = expected.filter { (k, v) -> (counts[k] ?: 0) < v }
         if (short.isNotEmpty()) {
