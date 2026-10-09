@@ -4,20 +4,26 @@ Custom Morphe patches enabling seamless YouTube Music mini-player integration di
 
 ## ❓ About
 
-This patch bundle provides custom patches and extra features built to work seamlessly alongside [bearinmindcat's patches](https://github.com/bearinmindcat/morphe-patches):
-- **YouTube Music Mini Player in Google Maps**: Allows modded/re-signed YouTube Music apps to connect to Google Maps as the active media provider.
+This patch bundle provides custom patches and extra features focused on enabling YouTube Music / YT Morphe mini-player integration directly inside Google Maps navigation, alongside core Google Maps functionality:
+- **YouTube Music Mini Player in Google Maps**: Seamlessly integrates YouTube Music (YT Morphe) into Google Maps navigation without navigation start crashes.
 - **External Media Browser Connections**: Unlocks YouTube Music's MediaBrowserService entitlement gate and allowlist so Google Maps, Android Auto, and external controllers can browse and play media.
-- **Package Renaming & Data Restoration**: Lets Google Maps run alongside the stock app with its own package name while keeping maps tile loading, search, and routing working.
+- **Maps Enhancements & Customization**: Bundles all essential Maps patches (Customization screen, Black AMOLED theme, Power saving mode, Zoom controls, Location provider toggle, Play Services check bypass, and Telemetry removal).
 
-> [!NOTE]
-> These patches are fully compatible with [bearinmindcat/morphe-patches](https://github.com/bearinmindcat/morphe-patches) and serve as "extras" to enable navigation media playback integration.
+> [!WARNING]
+> **Compatibility Note**: This repository contains a curated, standalone set of Google Maps patches adapted directly from [bearinmindcat/morphe-patches](https://github.com/bearinmindcat/morphe-patches). Because this bundle focuses specifically on stable YouTube Music / YT Morphe integration, it uses a streamlined media provider hook to prevent crashes on navigation start. As a result, it is **probably not compatible with newer releases of bearinmindcat's patches** due to differences in how media players are handled. You should use this repository as an all-in-one source for the patches included here.
 
 ### 🙏 Credits & Attribution
 
-Special thanks and credit to **[bearinmindcat](https://github.com/bearinmindcat/morphe-patches)** for the original implementation of:
+Enormous credit and special thanks go to **[bearinmindcat](https://github.com/bearinmindcat/morphe-patches)** for creating and maintaining the upstream Google Maps patches adapted in this repository:
+- **Customization screen**
+- **Black theme** (AMOLED dark styling & resources)
+- **Power saving mode**
+- **Zoom controls in navigation**
+- **Location provider toggle & Network location fallback**
 - **Restore map data**
 - **Change package name**
 - **Bypass Play Services checks**
+- **Remove telemetry & Remove permissions**
 - **Add microG support**
 
 ### How to use these patches
