@@ -1,3 +1,9 @@
+## [1.1.0-dev.6](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.5...v1.1.0-dev.6) (2026-10-09)
+
+### 🐛 Bug Fixes
+
+* **maps:** prevent crash on starting navigation and sync telemetry with v1.4.0 ([e707d7c](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/e707d7c4fd2c9e540ba296c68dfad91bc7a97ced))
+
 ## [1.1.0-dev.5](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.4...v1.1.0-dev.5) (2026-10-09)
 
 ### ✨ New Features
