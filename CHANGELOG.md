@@ -1,3 +1,9 @@
+## [1.1.0-dev.7](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.6...v1.1.0-dev.7) (2026-10-09)
+
+### ✨ New Features
+
+* **maps:** add Customization screen, Power saving mode, and Zoom controls ([45a385d](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/45a385d81f7f8ba5470bf143d1efe18f25e375ef))
+
 ## [1.1.0-dev.6](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.5...v1.1.0-dev.6) (2026-10-09)
 
 ### 🐛 Bug Fixes
