@@ -1,3 +1,9 @@
+## [1.1.0-dev.3](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.2...v1.1.0-dev.3) (2026-10-09)
+
+### ✨ New Features
+
+* **maps:** use app.morphe.android.apps.maps and add full Morphe+ReVanced MicroG spoofing tags ([e6872c7](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/e6872c7940bf5407a14a170c8f9e91601b3f4553))
+
 ## [1.1.0-dev.2](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.1...v1.1.0-dev.2) (2026-10-09)
 
 ### ✨ New Features
