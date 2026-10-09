@@ -4,10 +4,19 @@ Custom Morphe patches enabling seamless YouTube Music mini-player integration di
 
 ## ❓ About
 
-This patch bundle provides:
-- **YouTube Music Mini Player in Google Maps**: Allows modded/re-signed YouTube Music apps (standard, Morphe, or ReVanced) to connect to Google Maps as the active media provider.
-- **External Media Browser Connections**: Unlocks YouTube Music's MediaBrowserService entitlement gate and whitelist so Google Maps, Android Auto, and external controllers can browse and play media.
+This patch bundle provides custom patches and extra features built to work seamlessly alongside [bearinmindcat's patches](https://github.com/bearinmindcat/morphe-patches):
+- **YouTube Music Mini Player in Google Maps**: Allows modded/re-signed YouTube Music apps to connect to Google Maps as the active media provider.
+- **External Media Browser Connections**: Unlocks YouTube Music's MediaBrowserService entitlement gate and allowlist so Google Maps, Android Auto, and external controllers can browse and play media.
 - **Package Renaming & Data Restoration**: Lets Google Maps run alongside the stock app with its own package name while keeping maps tile loading, search, and routing working.
+
+> [!NOTE]
+> These patches are fully compatible with [bearinmindcat/morphe-patches](https://github.com/bearinmindcat/morphe-patches) and serve as "extras" to enable navigation media playback integration.
+
+### 🙏 Credits & Attribution
+
+Special thanks and credit to **[bearinmindcat](https://github.com/bearinmindcat/morphe-patches)** for the original implementation of:
+- **Restore map data**
+- **Change package name**
 
 ### How to use these patches
 Install Morphe Manager if you have not yet: https://morphe.software
@@ -21,7 +30,7 @@ Add this repository as a custom source in Morphe Manager:
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.0.0](https://github.com/bartlomiejfornalczyk/morphe-patches/releases/tag/v1.0.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;7 patches total
+> **[v1.0.0](https://github.com/bartlomiejfornalczyk/morphe-patches/releases/tag/v1.0.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;5 patches total
 <details open>
 <summary>📦 Google Maps&nbsp;&nbsp;•&nbsp;&nbsp;4 patches</summary>
 <br>
@@ -42,26 +51,6 @@ Add this repository as a custom source in Morphe Manager:
 
 <details open>
 <summary>📦 YouTube Music&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
-<br>
-
-| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
-|----------|----------------|-----------|
-| [Allow external media browser connections](#allow-external-media-browser-connections) | Allows Google Maps, Android Auto, and third-party media controllers to connect to YouTube Music. |  |
-
-</details>
-
-<details open>
-<summary>📦 YouTube Music (Morphe)&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
-<br>
-
-| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
-|----------|----------------|-----------|
-| [Allow external media browser connections](#allow-external-media-browser-connections) | Allows Google Maps, Android Auto, and third-party media controllers to connect to YouTube Music. |  |
-
-</details>
-
-<details open>
-<summary>📦 YouTube Music (ReVanced)&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
 <br>
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
