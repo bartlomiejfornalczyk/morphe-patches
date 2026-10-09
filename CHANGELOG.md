@@ -1,3 +1,9 @@
+## [1.1.0-dev.8](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.7...v1.1.0-dev.8) (2026-10-09)
+
+### ✨ New Features
+
+* **maps:** add Black theme patch from v1.7.12 ([5104787](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/5104787b4eefb2357937d684a25ce3c467f3ff90))
+
 ## [1.1.0-dev.7](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.6...v1.1.0-dev.7) (2026-10-09)
 
 ### ✨ New Features
