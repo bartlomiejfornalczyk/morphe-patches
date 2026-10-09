@@ -1,3 +1,9 @@
+## [1.1.0-dev.5](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.4...v1.1.0-dev.5) (2026-10-09)
+
+### ✨ New Features
+
+* **maps:** add Location provider toggle and Network location fallback patches ([1591346](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/15913468f41eb80ffad17e5fb8330ae8ab74cbe1))
+
 ## [1.1.0-dev.4](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.3...v1.1.0-dev.4) (2026-10-09)
 
 ### ✨ New Features
