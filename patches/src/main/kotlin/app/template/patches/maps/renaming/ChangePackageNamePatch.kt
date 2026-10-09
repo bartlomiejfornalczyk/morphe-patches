@@ -10,6 +10,7 @@ import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringOption
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import app.template.patches.maps.microg.stockPackageLookupPatch
 import app.template.patches.shared.Constants.COMPATIBILITY_GOOGLE_MAPS
 
 private const val STOCK_PACKAGE = "com.google.android.apps.maps"
@@ -31,6 +32,7 @@ val changePackageNamePatch = resourcePatch(
     default = true,
 ) {
     compatibleWith(COMPATIBILITY_GOOGLE_MAPS)
+    dependsOn(stockPackageLookupPatch)
 
     val packageName = stringOption(
         key = "packageName",
