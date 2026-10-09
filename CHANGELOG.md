@@ -1,5 +1,15 @@
 ## [1.1.0-dev.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.0.1...v1.1.0-dev.1) (2026-10-09)
 
+### 🐛 Bug Fixes
+
+* **ci:** remove backmerge plugin to fix semantic-release on dev ([07bd2e2](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/07bd2e2fa0fc362ce3380475ebbfa502f29f3a54))
+
+### ✨ New Features
+
+* **maps:** port Bypass Play Services checks and Add microG support from bearinmindcat ([ada04b4](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/ada04b4f22c945481f6765449bf3c8382827a544))
+
+## [1.1.0-dev.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.0.1...v1.1.0-dev.1) (2026-10-09)
+
 ### ✨ New Features
 
 * **maps:** port Bypass Play Services checks and Add microG support from bearinmindcat ([ada04b4](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/ada04b4f22c945481f6765449bf3c8382827a544))
