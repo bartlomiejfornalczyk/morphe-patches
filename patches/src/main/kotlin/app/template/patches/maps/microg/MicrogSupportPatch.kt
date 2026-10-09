@@ -135,6 +135,10 @@ private val microgManifestPatch = resourcePatch(
             meta("$MICROG_PACKAGE.SPOOFED_PACKAGE_SIGNATURE", STOCK_CERT_SHA1)
             meta("$VENDOR.MICROG_PACKAGE_NAME", MICROG_PACKAGE)
             meta("$MICROG_PACKAGE.MICROG_PACKAGE_NAME", MICROG_PACKAGE)
+            meta("app.morphe.android.gms.SPOOFED_PACKAGE_NAME", STOCK_PACKAGE)
+            meta("app.morphe.android.gms.SPOOFED_PACKAGE_SIGNATURE", STOCK_CERT_SHA1)
+            meta("app.morphe.MICROG_PACKAGE_NAME", MICROG_PACKAGE)
+            meta("app.morphe.android.gms.MICROG_PACKAGE_NAME", MICROG_PACKAGE)
         }
     }
 }

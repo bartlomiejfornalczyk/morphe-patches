@@ -191,7 +191,7 @@
           "description": "The package name to install under.",
           "required": true,
           "type": "kotlin.String",
-          "default": "app.revanced.android.apps.maps",
+          "default": "app.morphe.android.apps.maps",
           "values": null
         }
       ]
