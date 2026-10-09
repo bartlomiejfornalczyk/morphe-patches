@@ -161,3 +161,262 @@ internal val screenHostPatch = bytecodePatch(
     }
 }
 
+/**
+ * Avatars -- a signed-in account's picture, drawn inside Google's coloured account ring, which
+ * is drawn round. Squared by Rectangle Shapes, the picture sat in the ring as a square, so the
+ * code that makes avatars round keeps its circles; its colours still go through the shims. The
+ * picture is cut round by a circle crop and the letter avatar painted by a monogram painter,
+ * both found by what they draw (see [drawsAvatar]); the avatar view keeps its round clip.
+ */
+private val ROUND_AVATARS = setOf(
+    "Lcom/google/android/libraries/onegoogle/account/disc/AvatarView;",
+    "Lcom/google/android/libraries/onegoogle/account/disc/SimpleAvatarView;",
+)
+
+private fun com.android.tools.smali.dexlib2.iface.reference.MethodReference.isCall(owner: String, name: String, parameters: String) =
+    definingClass == owner && this.name == name && parameterTypes.joinToString("") == parameters
+
+private enum class AvatarPainter { CIRCLE_CROP, MONOGRAM }
+
+private fun avatarPainter(classDef: com.android.tools.smali.dexlib2.iface.ClassDef): AvatarPainter? {
+    for (method in classDef.methods) {
+        val calls = method.implementation?.instructions
+            ?.mapNotNull { (it as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference as? com.android.tools.smali.dexlib2.iface.reference.MethodReference }.orEmpty()
+        fun has(owner: String, name: String, parameters: String) = calls.any { it.isCall(owner, name, parameters) }
+        val canvas = "Landroid/graphics/Canvas;"
+        val paint = "Landroid/graphics/Paint;"
+        if (!has("Landroid/graphics/Bitmap;", "createBitmap", "IILandroid/graphics/Bitmap\$Config;") ||
+            !has(canvas, "drawCircle", "FFF$paint")
+        ) continue
+        if (has(paint, "setXfermode", "Landroid/graphics/Xfermode;") && has(canvas, "drawBitmap", "Landroid/graphics/Bitmap;FF$paint")) {
+            return AvatarPainter.CIRCLE_CROP
+        }
+        if (has(paint, "setTextAlign", "Landroid/graphics/Paint\$Align;") && has(canvas, "drawText", "Ljava/lang/String;FF$paint")) {
+            return AvatarPainter.MONOGRAM
+        }
+    }
+    return null
+}
+
+internal val shapeShimsPatch = bytecodePatch(
+    description = "Routes framework shape and colour calls through the UI extension.",
+) {
+    dependsOn(sharedExtensionPatch)
+
+    execute {
+        val gd = "Landroid/graphics/drawable/GradientDrawable;"
+        val path = "Landroid/graphics/Path;"
+        val canvas = "Landroid/graphics/Canvas;"
+        val outline = "Landroid/graphics/Outline;"
+        val dir = "Landroid/graphics/Path\$Direction;"
+        val rectF = "Landroid/graphics/RectF;"
+        val rect = "Landroid/graphics/Rect;"
+        val paint = "Landroid/graphics/Paint;"
+
+        // (owner, method, parameters) -- the shim takes (owner, parameters...), same name, void.
+        val shapeVirtuals = listOf(
+            Triple(gd, "setCornerRadius", "F"), Triple(gd, "setCornerRadii", "[F"), Triple(gd, "setShape", "I"),
+            Triple(path, "addRoundRect", rectF + "FF" + dir), Triple(path, "addRoundRect", rectF + "[F" + dir),
+            Triple(path, "addRoundRect", "FFFFFF$dir"), Triple(path, "addRoundRect", "FFFF[F$dir"),
+            Triple(path, "addOval", rectF + dir), Triple(path, "addOval", "FFFF$dir"), Triple(path, "addCircle", "FFF$dir"),
+            Triple(canvas, "drawRoundRect", rectF + "FF" + paint), Triple(canvas, "drawRoundRect", "FFFFFF$paint"),
+            Triple(canvas, "drawCircle", "FFF$paint"), Triple(canvas, "drawOval", rectF + paint), Triple(canvas, "drawOval", "FFFF$paint"),
+            Triple(outline, "setRoundRect", "IIIIF"), Triple(outline, "setRoundRect", rect + "F"),
+            Triple(outline, "setOval", "IIII"), Triple(outline, "setOval", rect),
+        )
+        val virtuals = shapeVirtuals + listOf(
+            // Black theme: literal colours handed to the framework
+            Triple(gd, "setColor", "I"), Triple("Landroid/graphics/drawable/ColorDrawable;", "setColor", "I"),
+            Triple(paint, "setColor", "I"), Triple("Landroid/view/View;", "setBackgroundColor", "I"),
+            Triple("Landroid/widget/TextView;", "setTextColor", "I"), Triple(canvas, "drawColor", "I"),
+            Triple("Landroid/view/Window;", "setStatusBarColor", "I"), Triple("Landroid/view/Window;", "setNavigationBarColor", "I"),
+            Triple("Landroid/graphics/drawable/Drawable;", "setTint", "I"),
+            // draw-time Paint colour remap (Material elevation overlays etc.)
+            Triple(canvas, "drawPath", path + paint), Triple(canvas, "drawRect", rectF + paint),
+            Triple(canvas, "drawRect", rect + paint), Triple(canvas, "drawRect", "FFFF$paint"),
+        )
+        fun params(descriptor: String): List<String> {
+            val out = mutableListOf<String>()
+            var i = 0
+            while (i < descriptor.length) {
+                var j = i
+                while (descriptor[j] == '[') j++
+                j = if (descriptor[j] == 'L') descriptor.indexOf(';', j) + 1 else j + 1
+                out += descriptor.substring(i, j)
+                i = j
+            }
+            return out
+        }
+        fun key(owner: String, name: String, parameters: List<String>, returnType: String) =
+            "$owner->$name(${parameters.joinToString("")})$returnType"
+
+        val rules = HashMap<String, com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference>()
+        for ((owner, name, p) in virtuals) {
+            val ps = params(p)
+            rules[key(owner, name, ps, "V")] = com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference(SHAPES, name, listOf(owner) + ps, "V")
+        }
+        val shapeKeys = shapeVirtuals.map { (owner, name, p) -> key(owner, name, params(p), "V") }.toSet()
+        val colourRules = rules.filterKeys { it !in shapeKeys }
+        val csl = "Landroid/content/res/ColorStateList;"
+        val staticRules = mapOf(
+            key(csl, "valueOf", listOf("I"), csl) to com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference(SHAPES, "valueOf", listOf("I"), csl),
+        )
+        val shapeSubclasses = mapOf(
+            "Landroid/graphics/drawable/shapes/RoundRectShape;" to "Lorg/ungoogled/ui/URoundRectShape;",
+            "Landroid/graphics/drawable/shapes/OvalShape;" to "Lorg/ungoogled/ui/UOvalShape;",
+        )
+        // Colour arguments of two constructors, remapped in place right before the constructor runs.
+        val ctorColourArgs = mapOf(
+            key("Landroid/graphics/drawable/ColorDrawable;", "<init>", listOf("I"), "V") to (1 to "color(I)I"),
+            key(csl, "<init>", listOf("[[I", "[I"), "V") to (2 to "colors([I)[I"),
+        )
+
+        var sites = 0
+        var classes = 0
+        val work = mutableListOf<Pair<String, com.android.tools.smali.dexlib2.iface.Method>>()
+        val reparent = mutableListOf<String>()
+        val roundAvatars = ROUND_AVATARS.toMutableSet()
+        val painters = mutableSetOf<AvatarPainter>()
+        classDefForEach { classDef ->
+            if (classDef.type.startsWith("Lorg/ungoogled/")) return@classDefForEach
+            avatarPainter(classDef)?.let { painters += it; roundAvatars += classDef.type }
+        }
+        if (painters.size != AvatarPainter.entries.size) throw PatchException("avatar circle crop or monogram painter not found: $painters")
+        classDefForEach { classDef ->
+            if (classDef.type.startsWith("Lorg/ungoogled/")) return@classDefForEach
+            if (classDef.superclass in shapeSubclasses) reparent += classDef.type
+            val classRules = if (classDef.type in roundAvatars) colourRules else rules
+            for (method in classDef.methods) {
+                val instructions = method.implementation?.instructions ?: continue
+                if (instructions.any { insn -> rewriteKind(insn, classRules, staticRules, shapeSubclasses, ctorColourArgs) != null }) {
+                    work += classDef.type to method
+                }
+            }
+        }
+        // A subclass's constructor calls its parent's <init>, which is rewritten to the
+        // extension's subclass below, so the declared parent has to move with it.
+        for (type in reparent) {
+            val mutableClass = mutableClassDefBy(type)
+            mutableClass.setSuperClass(shapeSubclasses.getValue(mutableClass.superclass!!))
+        }
+        for ((type, method) in work) {
+            val mutableClass = mutableClassDefBy(type)
+            val mutableMethod = mutableClass.methods.first {
+                it.name == method.name && it.parameterTypes == method.parameterTypes && it.returnType == method.returnType
+            }
+            sites += rewriteMethod(mutableMethod, if (type in roundAvatars) colourRules else rules, staticRules, shapeSubclasses, ctorColourArgs)
+            classes++
+        }
+        if (sites == 0) throw PatchException("no framework shape or colour calls found to reroute")
+
+        // Every rerouted framework method must be gone (invoke-super excepted: a
+        // class calling its own parent implementation must keep doing so).
+        val watched = listOf(
+            "Landroid/graphics/drawable/GradientDrawable;->(setCornerRadius|setCornerRadii|setShape)\\(",
+            "Landroid/graphics/Path;->(addRoundRect|addOval|addCircle)\\(",
+            "Landroid/graphics/Canvas;->(drawRoundRect|drawCircle|drawOval|drawPath|drawRect)\\(",
+            "Landroid/graphics/Outline;->(setRoundRect|setOval)\\(",
+            "Landroid/graphics/drawable/shapes/(RoundRectShape|OvalShape);-><init>\\(",
+            "Landroid/graphics/drawable/(GradientDrawable|ColorDrawable);->setColor\\(I\\)",
+            "Landroid/graphics/Paint;->setColor\\(I\\)", "Landroid/view/View;->setBackgroundColor\\(",
+            "Landroid/widget/TextView;->setTextColor\\(I\\)", "Landroid/graphics/Canvas;->drawColor\\(I\\)",
+            "Landroid/view/Window;->set(StatusBar|NavigationBar)Color\\(", "Landroid/content/res/ColorStateList;->valueOf\\(",
+        ).joinToString("|").toRegex()
+        val leftovers = mutableListOf<String>()
+        classDefForEach { classDef ->
+            if (classDef.type.startsWith("Lorg/ungoogled/")) return@classDefForEach
+            for (method in classDef.methods) {
+                for (insn in method.implementation?.instructions ?: continue) {
+                    if (insn.opcode == Opcode.INVOKE_SUPER || insn.opcode == Opcode.INVOKE_SUPER_RANGE) continue
+                    val ref = (insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference as? com.android.tools.smali.dexlib2.iface.reference.MethodReference ?: continue
+                    val k = key(ref.definingClass, ref.name, ref.parameterTypes.map { it.toString() }, ref.returnType)
+                    if (classDef.type in roundAvatars && k in shapeKeys) continue
+                    if (watched.containsMatchIn(k)) leftovers += "${classDef.type}->${method.name}: $k"
+                }
+            }
+        }
+        if (leftovers.isNotEmpty()) {
+            throw PatchException("unhandled framework shape/colour call(s), add a shim for them:\n" + leftovers.take(10).joinToString("\n"))
+        }
+        logger.info("Shape/colour shims: $sites call sites in $classes methods")
+    }
+}
+
+private val logger = java.util.logging.Logger.getLogger("ShapeShims")
+
+private fun rewriteKind(
+    insn: com.android.tools.smali.dexlib2.iface.instruction.Instruction,
+    rules: Map<String, com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference>,
+    staticRules: Map<String, com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference>,
+    subclasses: Map<String, String>,
+    ctorArgs: Map<String, Pair<Int, String>>,
+): String? {
+    val ref = (insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference ?: return null
+    if (insn.opcode == Opcode.NEW_INSTANCE) return if ((ref as com.android.tools.smali.dexlib2.iface.reference.TypeReference).type in subclasses) "new" else null
+    if (ref !is com.android.tools.smali.dexlib2.iface.reference.MethodReference) return null
+    val k = "${ref.definingClass}->${ref.name}(${ref.parameterTypes.joinToString("")})${ref.returnType}"
+    return when (insn.opcode) {
+        Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE -> if (k in rules) "virtual" else null
+        Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE -> if (k in staticRules) "static" else null
+        Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE -> when {
+            ref.name == "<init>" && ref.definingClass in subclasses -> "ctor"
+            k in ctorArgs && insn.opcode == Opcode.INVOKE_DIRECT -> "ctorArg"
+            else -> null
+        }
+        else -> null
+    }
+}
+
+/** Rewrites every matching site in one method, last to first so indices stay valid. */
+private fun rewriteMethod(
+    method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod,
+    rules: Map<String, com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference>,
+    staticRules: Map<String, com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference>,
+    subclasses: Map<String, String>,
+    ctorArgs: Map<String, Pair<Int, String>>,
+): Int {
+    val instructions = method.implementation!!.instructions
+    var count = 0
+    for (i in instructions.indices.reversed()) {
+        val insn = instructions[i]
+        val kind = rewriteKind(insn, rules, staticRules, subclasses, ctorArgs) ?: continue
+        val ref = (insn as com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction).reference
+        when (kind) {
+            "new" -> {
+                val type = subclasses.getValue((ref as com.android.tools.smali.dexlib2.iface.reference.TypeReference).type)
+                method.replaceInstruction(i, "new-instance v${(insn as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA}, $type")
+            }
+            "virtual", "static", "ctor" -> {
+                ref as com.android.tools.smali.dexlib2.iface.reference.MethodReference
+                val target: com.android.tools.smali.dexlib2.iface.reference.MethodReference = when (kind) {
+                    "virtual" -> rules.getValue("${ref.definingClass}->${ref.name}(${ref.parameterTypes.joinToString("")})${ref.returnType}")
+                    "static" -> staticRules.getValue("${ref.definingClass}->${ref.name}(${ref.parameterTypes.joinToString("")})${ref.returnType}")
+                    else -> com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference(subclasses.getValue(ref.definingClass), "<init>", ref.parameterTypes, "V")
+                }
+                val opcodeRange = when (kind) { "ctor" -> Opcode.INVOKE_DIRECT_RANGE; else -> Opcode.INVOKE_STATIC_RANGE }
+                val opcode = when (kind) { "ctor" -> Opcode.INVOKE_DIRECT; else -> Opcode.INVOKE_STATIC }
+                val replacement = if (insn is com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc) {
+                    com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc(opcodeRange, insn.startRegister, insn.registerCount, target)
+                } else {
+                    insn as Instruction35c
+                    com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c(
+                        opcode, insn.registerCount,
+                        insn.registerC, insn.registerD, insn.registerE, insn.registerF, insn.registerG, target,
+                    )
+                }
+                method.replaceInstruction(i, replacement)
+            }
+            "ctorArg" -> {
+                ref as com.android.tools.smali.dexlib2.iface.reference.MethodReference
+                val (argIndex, shim) = ctorArgs.getValue("${ref.definingClass}->${ref.name}(${ref.parameterTypes.joinToString("")})${ref.returnType}")
+                insn as Instruction35c
+                val reg = listOf(insn.registerC, insn.registerD, insn.registerE, insn.registerF, insn.registerG)[argIndex]
+                val move = if (shim.startsWith("colors")) "move-result-object" else "move-result"
+                method.addInstructionsAtLabel(i, "invoke-static { v$reg }, $SHAPES->$shim\n$move v$reg")
+            }
+        }
+        count++
+    }
+    return count
+}
+
