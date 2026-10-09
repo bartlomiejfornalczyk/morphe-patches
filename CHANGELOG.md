@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.0.0...v1.0.1) (2026-10-09)
+
+### 🐛 Bug Fixes
+
+* show only Google Maps and YouTube Music, add credits for bearinmindcat ([f91cab4](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/f91cab4c051a22468938fbb97736242ca693e968))
+
 ## 1.0.0 (2026-10-05)
 
 ### ✨ Initial Release
