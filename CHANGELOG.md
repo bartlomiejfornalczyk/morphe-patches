@@ -1,3 +1,9 @@
+## [1.1.0-dev.9](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.8...v1.1.0-dev.9) (2026-10-10)
+
+### ✨ New Features
+
+* **maps:** elevate right navigation buttons above media player panel ([36854df](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/36854dfa4cd2b84dfa64db18a321e103567daad7))
+
 ## [1.1.0-dev.8](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.7...v1.1.0-dev.8) (2026-10-09)
 
 ### ✨ New Features
