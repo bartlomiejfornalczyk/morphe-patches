@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0...v1.2.0) (2026-10-10)
+
+### ✨ New Features
+
+* **maps:** add Elevate right navigation buttons patch ([d1e1479](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/d1e1479ac067894ff734795569b43e7c607cd7d3))
+
 ## [1.1.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.0.1...v1.1.0) (2026-10-09)
 
 ### 🐛 Bug Fixes
