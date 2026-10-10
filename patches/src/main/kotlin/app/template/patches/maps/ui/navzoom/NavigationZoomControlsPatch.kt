@@ -10,7 +10,7 @@ import app.template.patches.shared.Constants.COMPATIBILITY_GOOGLE_MAPS
 val navigationZoomControlsPatch = bytecodePatch(
     name = "Zoom controls in navigation",
     description = "Adds +, − and reset tiles during turn-by-turn that change the navigation zoom " +
-        "while the camera keeps following the car. Elevates right-side navigation buttons above media player panel.",
+        "while the camera keeps following the car.",
     default = true,
 ) {
     compatibleWith(COMPATIBILITY_GOOGLE_MAPS)
@@ -18,7 +18,7 @@ val navigationZoomControlsPatch = bytecodePatch(
 
     execute {
         // The tiles and the zoom hold are the extension's (Shapes); the camera hooks
-        // and right buttons elevator they run on are navigationCameraHookPatch's.
+        // they run on are navigationCameraHookPatch's.
         markPatched("navZoomPatched")
     }
 }
