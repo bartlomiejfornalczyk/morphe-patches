@@ -1,3 +1,9 @@
+## [1.1.0-dev.12](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.11...v1.1.0-dev.12) (2026-10-10)
+
+### 🐛 Bug Fixes
+
+* **maps:** elevate all right navigation buttons (search, mute, incident, media, compass) above media player ([e7521a8](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/e7521a806f1aef83f47dc6e655ee0545c3b7bff0))
+
 ## [1.1.0-dev.11](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.10...v1.1.0-dev.11) (2026-10-10)
 
 ### 🐛 Bug Fixes
