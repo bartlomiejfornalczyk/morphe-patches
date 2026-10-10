@@ -1,3 +1,9 @@
+## [1.1.0-dev.10](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.9...v1.1.0-dev.10) (2026-10-10)
+
+### 🐛 Bug Fixes
+
+* **maps:** connect NavButtonsElevator hooks in Shapes and elevate right navigation stack views ([ffebb5d](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/ffebb5de2772244716015ce74af84a61e073a1fa))
+
 ## [1.1.0-dev.9](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.8...v1.1.0-dev.9) (2026-10-10)
 
 ### ✨ New Features
