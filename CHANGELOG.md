@@ -1,3 +1,9 @@
+## [1.1.0-dev.11](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.10...v1.1.0-dev.11) (2026-10-10)
+
+### 🐛 Bug Fixes
+
+* **maps:** reliably elevate right nav buttons stack on pre-draw above media player ([1d83a89](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/1d83a891f92df90fc6af73826016397dc928759e))
+
 ## [1.1.0-dev.10](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.9...v1.1.0-dev.10) (2026-10-10)
 
 ### 🐛 Bug Fixes
