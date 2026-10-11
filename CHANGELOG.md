@@ -1,3 +1,9 @@
+## [1.1.0-dev.18](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.17...v1.1.0-dev.18) (2026-10-11)
+
+### 🐛 Bug Fixes
+
+* **music:** bypass entitlement and account gating in lbg.i for external media playback ([fe53cbb](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/fe53cbb895205404b47cfb3d7de6a7b48b571c9c))
+
 ## [1.1.0-dev.17](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.16...v1.1.0-dev.17) (2026-10-11)
 
 ### 🐛 Bug Fixes
