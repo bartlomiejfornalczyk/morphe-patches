@@ -1,3 +1,5 @@
+## [1.1.0-dev.15](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.14...v1.1.0-dev.15) (2026-10-11)
+
 ## [1.1.0-dev.14](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.13...v1.1.0-dev.14) (2026-10-11)
 
 ### 🐛 Bug Fixes
