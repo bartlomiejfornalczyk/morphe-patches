@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-11T09:36:32",
-  "description": "## [1.2.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.2.0...v1.2.1) (2026-10-11)\n\n### 🐛 Bug Fixes\n\n* **music:** enable media browsing in Google Maps and external controllers ([67aef36](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/67aef36e0cb6879d14b0fd9409706d4b7590f852))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.2.1/patches-1.2.1.mpp",
+  "created_at": "2026-10-11T09:46:44",
+  "description": "## [1.2.2](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.2.1...v1.2.2) (2026-10-11)",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.2.2/patches-1.2.2.mpp",
   "signature_download_url": "",
-  "version": "1.2.1"
+  "version": "1.2.2"
 }
