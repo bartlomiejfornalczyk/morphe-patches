@@ -36,3 +36,12 @@ object MediaSessionCallbackFingerprint : Fingerprint(
 object MediaBrowserCustomActionsFingerprint : Fingerprint(
     strings = listOf("com.google.android.apps.youtube.music.mediabrowser.custom_actions")
 )
+
+/**
+ * Matches MusicMediaSessionPlayerController (lbg) in YouTube Music.
+ * Coordinates ExoPlayer and QueueController playback commands.
+ */
+object MediaSessionPlayerControllerFingerprint : Fingerprint(
+    strings = listOf("com/google/android/apps/youtube/music/mediabrowser/MusicMediaSessionPlayerController")
+)
+

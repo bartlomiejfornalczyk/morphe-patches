@@ -215,6 +215,36 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                         """const-string v1, "MBS_ACTION_OFFLINE""""
                     }
 
+                    val discoverMediaIdSmali = if (mxtClass != null && mxtEncodeMethod != null) {
+                        """
+                            const-string v1, "RDEV"
+                            invoke-static { v1 }, ${mxtClass.type}->${mxtEncodeMethod.name}(Ljava/lang/String;)Ljava/lang/String;
+                            move-result-object v1
+                        """.trimIndent()
+                    } else {
+                        """const-string v1, "MBS_ACTION_DISCOVER""""
+                    }
+
+                    val newReleaseMediaIdSmali = if (mxtClass != null && mxtEncodeMethod != null) {
+                        """
+                            const-string v1, "RDAMVM"
+                            invoke-static { v1 }, ${mxtClass.type}->${mxtEncodeMethod.name}(Ljava/lang/String;)Ljava/lang/String;
+                            move-result-object v1
+                        """.trimIndent()
+                    } else {
+                        """const-string v1, "MBS_ACTION_NEW""""
+                    }
+
+                    val chartsMediaIdSmali = if (mxtClass != null && mxtEncodeMethod != null) {
+                        """
+                            const-string v1, "RDMM"
+                            invoke-static { v1 }, ${mxtClass.type}->${mxtEncodeMethod.name}(Ljava/lang/String;)Ljava/lang/String;
+                            move-result-object v1
+                        """.trimIndent()
+                    } else {
+                        """const-string v1, "MBS_ACTION_CHARTS""""
+                    }
+
                     fun makeItemSmali(mediaIdSmali: String, title: String, subtitle: String): String = """
                         new-instance v0, Landroid/support/v4/media/MediaDescriptionCompat;
                         $mediaIdSmali
@@ -245,10 +275,13 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                         new-instance p1, Ljava/util/ArrayList;
                         invoke-direct { p1 }, Ljava/util/ArrayList;-><init>()V
 
+                        ${makeItemSmali(supermixMediaIdSmali, "My Supermix", "Personalized endless radio")}
                         ${makeItemSmali(lmMediaIdSmali, "Liked Music", "Your favorites")}
-                        ${makeItemSmali(supermixMediaIdSmali, "My Supermix", "Endless personalized radio")}
-                        ${makeItemSmali(offlineMediaIdSmali, "Downloaded Songs", "Offline playlist")}
-                        ${makeItemSmali("""const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Play current track")}
+                        ${makeItemSmali(offlineMediaIdSmali, "Downloaded Songs", "Offline library")}
+                        ${makeItemSmali(discoverMediaIdSmali, "Discover Mix", "New music for you")}
+                        ${makeItemSmali(newReleaseMediaIdSmali, "New Releases", "Latest music & albums")}
+                        ${makeItemSmali(chartsMediaIdSmali, "Mixed for You", "Popular hit songs")}
+                        ${makeItemSmali("""const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Resume current track")}
                         ${makeItemSmali("""const-string v1, "MBS_ACTION_NEXT"""", "Next Track", "Skip to next song")}
                         ${makeItemSmali("""const-string v1, "MBS_ACTION_PREV"""", "Previous Track", "Skip to previous song")}
 
@@ -262,8 +295,8 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
         }
 
         // 6. In MusicMediaSessionCallback (lag.g):
-        // Support custom action mediaIds ("MBS_ACTION_PLAY", "MBS_ACTION_NEXT", "MBS_ACTION_PREV", etc.)
-        // triggered when the user taps action tiles in Google Maps navigation browse sheet.
+        // Translate custom action mediaIds ("MBS_ACTION_PLAY", "MBS_ACTION_NEXT", "MBS_ACTION_PREV", etc.)
+        // into native playable playlist endpoints or invoke transport callbacks.
         val lagClass = MediaSessionCallbackFingerprint.classDefOrNull
             ?: classDefByStrings("MSC: onPlayFromMediaId(). appPkg: '%s' mediaId: '%s'").firstOrNull()
         if (lagClass != null) {
@@ -296,13 +329,13 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                             ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string == "onSkipToPrevious()"
                         } == true
                 }
-                val onSearchMethod = lagMutableClass.methods.firstOrNull { m ->
-                    m.parameterTypes.size == 2 &&
-                        m.parameterTypes[0] == "Ljava/lang/String;" &&
-                        m.parameterTypes[1] == "Landroid/os/Bundle;" &&
-                        m.implementation?.instructions?.any { insn ->
-                            ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string == "onPlayFromSearch()"
-                        } == true
+
+                val mxtClass = MediaBrowserCustomActionsFingerprint.classDefOrNull
+                    ?: classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull()
+                val mxtEncodeMethod = mxtClass?.methods?.firstOrNull { m ->
+                    m.parameterTypes == listOf("Ljava/lang/String;") &&
+                        m.returnType == "Ljava/lang/String;" &&
+                        (m.accessFlags and AccessFlags.STATIC.value != 0)
                 }
 
                 if (onPlayMethod != null && onSkipNextMethod != null && onSkipPrevMethod != null) {
@@ -314,7 +347,8 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                             if-eqz v0, :cond_check_next
                             invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
                             return-void
-
+                        """.trimIndent())
+                        appendLine("""
                             :cond_check_next
                             const-string v0, "MBS_ACTION_NEXT"
                             invoke-static { p1, v0 }, Landroid/text/TextUtils;->equals(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Z
@@ -337,17 +371,15 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                             move-result v0
                             if-eqz v0, :cond_check_supermix
                         """.trimIndent())
-                        if (onSearchMethod != null) {
+                        if (mxtClass != null && mxtEncodeMethod != null) {
                             appendLine("""
-                                const-string v0, "Liked Music"
-                                invoke-virtual { p0, v0, p2 }, ${lagClass.type}->${onSearchMethod.name}(Ljava/lang/String;Landroid/os/Bundle;)V
-                                return-void
+                                const-string p1, "LM"
+                                invoke-static { p1 }, ${mxtClass.type}->${mxtEncodeMethod.name}(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object p1
+                                goto :cond_actions_done
                             """.trimIndent())
                         } else {
-                            appendLine("""
-                                invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
-                                return-void
-                            """.trimIndent())
+                            appendLine("return-void")
                         }
                         appendLine("""
                             :cond_check_supermix
@@ -356,36 +388,83 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                             move-result v0
                             if-eqz v0, :cond_check_offline
                         """.trimIndent())
-                        if (onSearchMethod != null) {
+                        if (mxtClass != null && mxtEncodeMethod != null) {
                             appendLine("""
-                                const-string v0, "My Supermix"
-                                invoke-virtual { p0, v0, p2 }, ${lagClass.type}->${onSearchMethod.name}(Ljava/lang/String;Landroid/os/Bundle;)V
-                                return-void
+                                const-string p1, "RDTM"
+                                invoke-static { p1 }, ${mxtClass.type}->${mxtEncodeMethod.name}(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object p1
+                                goto :cond_actions_done
                             """.trimIndent())
                         } else {
-                            appendLine("""
-                                invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
-                                return-void
-                            """.trimIndent())
+                            appendLine("return-void")
                         }
                         appendLine("""
                             :cond_check_offline
                             const-string v0, "MBS_ACTION_OFFLINE"
                             invoke-static { p1, v0 }, Landroid/text/TextUtils;->equals(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Z
                             move-result v0
-                            if-eqz v0, :cond_actions_done
+                            if-eqz v0, :cond_check_discover
                         """.trimIndent())
-                        if (onSearchMethod != null) {
+                        if (mxtClass != null && mxtEncodeMethod != null) {
                             appendLine("""
-                                const-string v0, "Offline"
-                                invoke-virtual { p0, v0, p2 }, ${lagClass.type}->${onSearchMethod.name}(Ljava/lang/String;Landroid/os/Bundle;)V
-                                return-void
+                                const-string p1, "PPSV"
+                                invoke-static { p1 }, ${mxtClass.type}->${mxtEncodeMethod.name}(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object p1
+                                goto :cond_actions_done
                             """.trimIndent())
                         } else {
+                            appendLine("return-void")
+                        }
+                        appendLine("""
+                            :cond_check_discover
+                            const-string v0, "MBS_ACTION_DISCOVER"
+                            invoke-static { p1, v0 }, Landroid/text/TextUtils;->equals(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Z
+                            move-result v0
+                            if-eqz v0, :cond_check_new
+                        """.trimIndent())
+                        if (mxtClass != null && mxtEncodeMethod != null) {
                             appendLine("""
-                                invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
-                                return-void
+                                const-string p1, "RDEV"
+                                invoke-static { p1 }, ${mxtClass.type}->${mxtEncodeMethod.name}(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object p1
+                                goto :cond_actions_done
                             """.trimIndent())
+                        } else {
+                            appendLine("return-void")
+                        }
+                        appendLine("""
+                            :cond_check_new
+                            const-string v0, "MBS_ACTION_NEW"
+                            invoke-static { p1, v0 }, Landroid/text/TextUtils;->equals(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Z
+                            move-result v0
+                            if-eqz v0, :cond_check_charts
+                        """.trimIndent())
+                        if (mxtClass != null && mxtEncodeMethod != null) {
+                            appendLine("""
+                                const-string p1, "RDAMVM"
+                                invoke-static { p1 }, ${mxtClass.type}->${mxtEncodeMethod.name}(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object p1
+                                goto :cond_actions_done
+                            """.trimIndent())
+                        } else {
+                            appendLine("return-void")
+                        }
+                        appendLine("""
+                            :cond_check_charts
+                            const-string v0, "MBS_ACTION_CHARTS"
+                            invoke-static { p1, v0 }, Landroid/text/TextUtils;->equals(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Z
+                            move-result v0
+                            if-eqz v0, :cond_actions_done
+                        """.trimIndent())
+                        if (mxtClass != null && mxtEncodeMethod != null) {
+                            appendLine("""
+                                const-string p1, "RDMM"
+                                invoke-static { p1 }, ${mxtClass.type}->${mxtEncodeMethod.name}(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object p1
+                                goto :cond_actions_done
+                            """.trimIndent())
+                        } else {
+                            appendLine("return-void")
                         }
                         appendLine(":cond_actions_done")
                         appendLine("nop")
@@ -394,5 +473,58 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                 }
             }
         }
+
+        // 7. In MusicMediaSessionPlayerController (lbg.i):
+        // Bypass user account restriction (this.o.v()) and external automotive entitlement check (skip_entitlement_check)
+        // so that queued playlists and tracks unconditionally execute playback commands (QueueController.b + Player.ah).
+        val lbgClass = MediaSessionPlayerControllerFingerprint.classDefOrNull
+            ?: classDefByStrings("com/google/android/apps/youtube/music/mediabrowser/MusicMediaSessionPlayerController").firstOrNull()
+            ?: classDefByStrings("skip_entitlement_check").firstOrNull()
+        if (lbgClass != null) {
+            val lbgMutableClass = mutableClassDefBy(lbgClass)
+            val playMediaMethod = lbgMutableClass.methods.firstOrNull { m ->
+                m.parameterTypes.size == 2 &&
+                    m.parameterTypes[1] == "Landroid/os/Bundle;" &&
+                    m.implementation?.instructions?.any { insn ->
+                        ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string == "skip_entitlement_check"
+                    } == true
+            }
+
+            if (playMediaMethod != null) {
+                val mImpl = playMediaMethod.implementation
+                if (mImpl != null) {
+                    val insnCount = mImpl.instructions.count()
+                    for (idx in 0 until insnCount) {
+                        val insn = mImpl.instructions.elementAt(idx)
+                        val ref = (insn as? ReferenceInstruction)?.reference
+
+                        // Force bundle.getBoolean("skip_entitlement_check", false) to return true (1)
+                        if ((ref as? StringReference)?.string == "skip_entitlement_check") {
+                            for (nextIdx in idx + 1 until minOf(idx + 6, insnCount)) {
+                                val nextInsn = mImpl.instructions.elementAt(nextIdx)
+                                if (nextInsn.opcode == Opcode.MOVE_RESULT) {
+                                    val reg = (nextInsn as OneRegisterInstruction).registerA
+                                    playMediaMethod.replaceInstruction(nextIdx, "const/16 v$reg, 0x1")
+                                    break
+                                }
+                            }
+                        }
+
+                        // Force this.o.v() (isSignedIn check) to return true (1)
+                        val mRef = ref as? MethodReference
+                        if (mRef?.name == "v" && mRef.returnType == "Z" && mRef.parameterTypes.isEmpty()) {
+                            if (idx + 1 < insnCount) {
+                                val nextInsn = mImpl.instructions.elementAt(idx + 1)
+                                if (nextInsn.opcode == Opcode.MOVE_RESULT) {
+                                    val reg = (nextInsn as OneRegisterInstruction).registerA
+                                    playMediaMethod.replaceInstruction(idx + 1, "const/16 v$reg, 0x1")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
+
