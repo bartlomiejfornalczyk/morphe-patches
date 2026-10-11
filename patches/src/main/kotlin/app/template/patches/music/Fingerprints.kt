@@ -32,15 +32,10 @@ object MediaSessionCallbackFingerprint : Fingerprint(
 
 /**
  * Matches MediaBrowserItemFactory / MediaItemEncoding (mxt / ixx) in YouTube Music.
- * Static method g encodes WatchEndpoint commands into playable mediaId strings.
+ * Methods in this class contain the custom_actions extra key.
  */
 object MediaBrowserCustomActionsFingerprint : Fingerprint(
-    name = "g",
-    returnType = "Ljava/lang/String;",
-    parameters = listOf("Ljava/lang/String;"),
-    strings = listOf("com.google.android.apps.youtube.music.mediabrowser.custom_actions"),
-    custom = { method, _ ->
-        (method.accessFlags and AccessFlags.STATIC.value != 0)
-    }
+    strings = listOf("com.google.android.apps.youtube.music.mediabrowser.custom_actions")
 )
+
 

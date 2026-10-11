@@ -3,13 +3,60 @@ package app.template.patches.music
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.resourcePatch
 import app.template.patches.shared.Constants.COMPATIBILITY_YOUTUBE_MUSIC
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import org.w3c.dom.Element
+
+val allowExternalMediaBrowserManifestPatch = resourcePatch(
+    name = "Allow external media browser launch",
+    description = "Adds MAIN and DEFAULT intent-filters to MusicActivity so external controllers like Google Maps can open the app.",
+    default = true
+) {
+    compatibleWith(COMPATIBILITY_YOUTUBE_MUSIC)
+
+    execute {
+        document("AndroidManifest.xml").use { doc ->
+            val manifest = doc.documentElement
+            val androidNs = "http://schemas.android.com/apk/res/android"
+
+            val activityNodes = doc.getElementsByTagName("activity")
+            for (i in 0 until activityNodes.length) {
+                val activity = activityNodes.item(i) as? Element ?: continue
+                val name = activity.getAttributeNS(androidNs, "name")
+                    .ifEmpty { activity.getAttribute("android:name") }
+                if (name == "com.google.android.apps.youtube.music.activities.MusicActivity") {
+                    val filter = doc.createElement("intent-filter")
+
+                    val action = doc.createElement("action").apply {
+                        setAttribute("android:name", "android.intent.action.MAIN")
+                        setAttributeNS(androidNs, "android:name", "android.intent.action.MAIN")
+                    }
+                    val catDefault = doc.createElement("category").apply {
+                        setAttribute("android:name", "android.intent.category.DEFAULT")
+                        setAttributeNS(androidNs, "android:name", "android.intent.category.DEFAULT")
+                    }
+                    val catLauncher = doc.createElement("category").apply {
+                        setAttribute("android:name", "android.intent.category.LAUNCHER")
+                        setAttributeNS(androidNs, "android:name", "android.intent.category.LAUNCHER")
+                    }
+
+                    filter.appendChild(action)
+                    filter.appendChild(catDefault)
+                    filter.appendChild(catLauncher)
+                    activity.appendChild(filter)
+                    break
+                }
+            }
+        }
+    }
+}
 
 @Suppress("unused")
 val allowExternalMediaBrowserPatch = bytecodePatch(
@@ -20,6 +67,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
     compatibleWith(
         COMPATIBILITY_YOUTUBE_MUSIC
     )
+    dependsOn(allowExternalMediaBrowserManifestPatch)
 
     execute {
         val method = MusicBrowserServiceFingerprint.methodOrNull
@@ -178,7 +226,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                 if (lkhCMethod.implementation != null) {
                     // Discover the native media item encoder (mxt.g / ixx.g) if present
                     val mxtClass = MediaBrowserCustomActionsFingerprint.classDefOrNull
-                        ?: classDefByOrNull { clazz ->
+                        ?: classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull { clazz ->
                             clazz.methods.any { m ->
                                 m.name == "g" &&
                                     m.parameterTypes == listOf("Ljava/lang/String;") &&
@@ -186,13 +234,12 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                     (m.accessFlags and AccessFlags.STATIC.value != 0)
                             }
                         }
-                    val mxtEncodeMethod = MediaBrowserCustomActionsFingerprint.methodOrNull
-                        ?: mxtClass?.methods?.firstOrNull { m ->
-                            m.name == "g" &&
-                                m.parameterTypes == listOf("Ljava/lang/String;") &&
-                                m.returnType == "Ljava/lang/String;" &&
-                                (m.accessFlags and AccessFlags.STATIC.value != 0)
-                        }
+                    val mxtEncodeMethod = mxtClass?.methods?.firstOrNull { m ->
+                        m.name == "g" &&
+                            m.parameterTypes == listOf("Ljava/lang/String;") &&
+                            m.returnType == "Ljava/lang/String;" &&
+                            (m.accessFlags and AccessFlags.STATIC.value != 0)
+                    }
 
                     val lmMediaIdSmali = if (mxtClass != null && mxtEncodeMethod != null) {
                         """
@@ -340,7 +387,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                 }
 
                 val mxtClass = MediaBrowserCustomActionsFingerprint.classDefOrNull
-                    ?: classDefByOrNull { clazz ->
+                    ?: classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull { clazz ->
                         clazz.methods.any { m ->
                             m.name == "g" &&
                                 m.parameterTypes == listOf("Ljava/lang/String;") &&
@@ -348,13 +395,12 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                 (m.accessFlags and AccessFlags.STATIC.value != 0)
                         }
                     }
-                val mxtEncodeMethod = MediaBrowserCustomActionsFingerprint.methodOrNull
-                    ?: mxtClass?.methods?.firstOrNull { m ->
-                        m.name == "g" &&
-                            m.parameterTypes == listOf("Ljava/lang/String;") &&
-                            m.returnType == "Ljava/lang/String;" &&
-                            (m.accessFlags and AccessFlags.STATIC.value != 0)
-                    }
+                val mxtEncodeMethod = mxtClass?.methods?.firstOrNull { m ->
+                    m.name == "g" &&
+                        m.parameterTypes == listOf("Ljava/lang/String;") &&
+                        m.returnType == "Ljava/lang/String;" &&
+                        (m.accessFlags and AccessFlags.STATIC.value != 0)
+                }
 
                 if (onPlayMethod != null && onSkipNextMethod != null && onSkipPrevMethod != null) {
                     val actionSmali = buildString {
@@ -484,10 +530,61 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                         } else {
                             appendLine("return-void")
                         }
-                        appendLine(":cond_actions_done")
-                        appendLine("nop")
+                        appendLine("""
+                            :cond_actions_done
+                            if-nez p2, :cond_bundle_init
+                            goto :cond_bundle_set_skip
+                            :cond_bundle_init
+                            new-instance p2, Landroid/os/Bundle;
+                            invoke-direct { p2 }, Landroid/os/Bundle;-><init>()V
+                            :cond_bundle_set_skip
+                            const-string v0, "skip_entitlement_check"
+                            const/4 v1, 0x1
+                            invoke-virtual { p2, v0, v1 }, Landroid/os/Bundle;->putBoolean(Ljava/lang/String;Z)V
+                            nop
+                        """.trimIndent())
                     }
                     playFromMediaIdMethod.addInstructionsWithLabels(0, actionSmali)
+                }
+            }
+        }
+
+        // 7. In MediaSessionHelper (had.b / lai.b):
+        // Force bundle.putBoolean("skip_entitlement_check", true) so that all playback requests
+        // from external controllers (Google Maps, Android Auto, Bluetooth) bypass entitlement gating.
+        val hadClass = classDefByStrings("skip_entitlement_check").firstOrNull { clazz ->
+            clazz.methods.any { m ->
+                m.parameterTypes.size == 2 &&
+                    m.parameterTypes[1] == "Landroid/os/Bundle;" &&
+                    m.returnType == "Landroid/os/Bundle;" &&
+                    (m.accessFlags and AccessFlags.STATIC.value != 0)
+            }
+        }
+        if (hadClass != null) {
+            val hadMutableClass = mutableClassDefBy(hadClass)
+            val hadBMethod = hadMutableClass.methods.firstOrNull { m ->
+                m.parameterTypes.size == 2 &&
+                    m.parameterTypes[1] == "Landroid/os/Bundle;" &&
+                    m.returnType == "Landroid/os/Bundle;" &&
+                    (m.accessFlags and AccessFlags.STATIC.value != 0)
+            }
+            if (hadBMethod?.implementation != null) {
+                val impl = hadBMethod.implementation!!
+                for (i in 0 until impl.instructions.count()) {
+                    val insn = impl.instructions.elementAt(i)
+                    val strRef = ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string
+                    if (strRef == "skip_entitlement_check") {
+                        for (j in i + 1 until minOf(i + 4, impl.instructions.count())) {
+                            val nextInsn = impl.instructions.elementAt(j)
+                            val mRef = (nextInsn as? ReferenceInstruction)?.reference as? MethodReference
+                            if (mRef?.name == "putBoolean") {
+                                val reg = (nextInsn as? FiveRegisterInstruction)?.registerE ?: 1
+                                hadBMethod.addInstructionsWithLabels(j, "const/4 v$reg, 0x1")
+                                break
+                            }
+                        }
+                        break
+                    }
                 }
             }
         }
