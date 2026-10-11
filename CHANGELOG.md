@@ -1,3 +1,9 @@
+## [1.1.0-dev.17](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.16...v1.1.0-dev.17) (2026-10-11)
+
+### 🐛 Bug Fixes
+
+* **music:** relink branch labels with addInstructionsWithLabels to fix VerifyError in lkh.c ([51521e6](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/51521e63aeec12c63eac454c8b15acfcf9b3d28e))
+
 ## [1.1.0-dev.16](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.15...v1.1.0-dev.16) (2026-10-11)
 
 ### 🐛 Bug Fixes
