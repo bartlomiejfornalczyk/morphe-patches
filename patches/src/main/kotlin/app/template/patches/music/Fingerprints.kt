@@ -1,6 +1,7 @@
 package app.template.patches.music
 
 import app.morphe.patcher.Fingerprint
+import com.android.tools.smali.dexlib2.AccessFlags
 
 /**
  * Matches MusicBrowserService.onGetRoot in YouTube Music.
@@ -30,18 +31,16 @@ object MediaSessionCallbackFingerprint : Fingerprint(
 )
 
 /**
- * Matches MediaBrowserItemFactory / MediaItemEncoding (mxt) in YouTube Music.
- * Encodes WatchEndpoint commands into playable mediaId strings.
+ * Matches MediaBrowserItemFactory / MediaItemEncoding (mxt / ixx) in YouTube Music.
+ * Static method g encodes WatchEndpoint commands into playable mediaId strings.
  */
 object MediaBrowserCustomActionsFingerprint : Fingerprint(
-    strings = listOf("com.google.android.apps.youtube.music.mediabrowser.custom_actions")
-)
-
-/**
- * Matches MusicMediaSessionPlayerController (lbg) in YouTube Music.
- * Coordinates ExoPlayer and QueueController playback commands.
- */
-object MediaSessionPlayerControllerFingerprint : Fingerprint(
-    strings = listOf("com/google/android/apps/youtube/music/mediabrowser/MusicMediaSessionPlayerController")
+    name = "g",
+    returnType = "Ljava/lang/String;",
+    parameters = listOf("Ljava/lang/String;"),
+    strings = listOf("com.google.android.apps.youtube.music.mediabrowser.custom_actions"),
+    custom = { method, _ ->
+        (method.accessFlags and AccessFlags.STATIC.value != 0)
+    }
 )
 

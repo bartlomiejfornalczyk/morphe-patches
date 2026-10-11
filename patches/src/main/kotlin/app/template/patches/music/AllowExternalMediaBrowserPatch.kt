@@ -176,14 +176,23 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
 
             if (lkhCMethod != null) {
                 if (lkhCMethod.implementation != null) {
-                    // Discover the native media item encoder (mxt.g) if present
+                    // Discover the native media item encoder (mxt.g / ixx.g) if present
                     val mxtClass = MediaBrowserCustomActionsFingerprint.classDefOrNull
-                        ?: classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull()
-                    val mxtEncodeMethod = mxtClass?.methods?.firstOrNull { m ->
-                        m.parameterTypes == listOf("Ljava/lang/String;") &&
-                            m.returnType == "Ljava/lang/String;" &&
-                            (m.accessFlags and AccessFlags.STATIC.value != 0)
-                    }
+                        ?: classDefByOrNull { clazz ->
+                            clazz.methods.any { m ->
+                                m.name == "g" &&
+                                    m.parameterTypes == listOf("Ljava/lang/String;") &&
+                                    m.returnType == "Ljava/lang/String;" &&
+                                    (m.accessFlags and AccessFlags.STATIC.value != 0)
+                            }
+                        }
+                    val mxtEncodeMethod = MediaBrowserCustomActionsFingerprint.methodOrNull
+                        ?: mxtClass?.methods?.firstOrNull { m ->
+                            m.name == "g" &&
+                                m.parameterTypes == listOf("Ljava/lang/String;") &&
+                                m.returnType == "Ljava/lang/String;" &&
+                                (m.accessFlags and AccessFlags.STATIC.value != 0)
+                        }
 
                     val lmMediaIdSmali = if (mxtClass != null && mxtEncodeMethod != null) {
                         """
@@ -246,8 +255,8 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                     }
 
                     fun makeItemSmali(mediaIdSmali: String, title: String, subtitle: String): String = """
-                        new-instance v0, Landroid/support/v4/media/MediaDescriptionCompat;
                         $mediaIdSmali
+                        new-instance v0, Landroid/support/v4/media/MediaDescriptionCompat;
                         const-string v2, "$title"
                         const-string v3, "$subtitle"
                         const/4 v4, 0x0
@@ -331,12 +340,21 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                 }
 
                 val mxtClass = MediaBrowserCustomActionsFingerprint.classDefOrNull
-                    ?: classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull()
-                val mxtEncodeMethod = mxtClass?.methods?.firstOrNull { m ->
-                    m.parameterTypes == listOf("Ljava/lang/String;") &&
-                        m.returnType == "Ljava/lang/String;" &&
-                        (m.accessFlags and AccessFlags.STATIC.value != 0)
-                }
+                    ?: classDefByOrNull { clazz ->
+                        clazz.methods.any { m ->
+                            m.name == "g" &&
+                                m.parameterTypes == listOf("Ljava/lang/String;") &&
+                                m.returnType == "Ljava/lang/String;" &&
+                                (m.accessFlags and AccessFlags.STATIC.value != 0)
+                        }
+                    }
+                val mxtEncodeMethod = MediaBrowserCustomActionsFingerprint.methodOrNull
+                    ?: mxtClass?.methods?.firstOrNull { m ->
+                        m.name == "g" &&
+                            m.parameterTypes == listOf("Ljava/lang/String;") &&
+                            m.returnType == "Ljava/lang/String;" &&
+                            (m.accessFlags and AccessFlags.STATIC.value != 0)
+                    }
 
                 if (onPlayMethod != null && onSkipNextMethod != null && onSkipPrevMethod != null) {
                     val actionSmali = buildString {
@@ -470,58 +488,6 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                         appendLine("nop")
                     }
                     playFromMediaIdMethod.addInstructionsWithLabels(0, actionSmali)
-                }
-            }
-        }
-
-        // 7. In MusicMediaSessionPlayerController (lbg.i):
-        // Bypass user account restriction (this.o.v()) and external automotive entitlement check (skip_entitlement_check)
-        // so that queued playlists and tracks unconditionally execute playback commands (QueueController.b + Player.ah).
-        val lbgClass = MediaSessionPlayerControllerFingerprint.classDefOrNull
-            ?: classDefByStrings("com/google/android/apps/youtube/music/mediabrowser/MusicMediaSessionPlayerController").firstOrNull()
-            ?: classDefByStrings("skip_entitlement_check").firstOrNull()
-        if (lbgClass != null) {
-            val lbgMutableClass = mutableClassDefBy(lbgClass)
-            val playMediaMethod = lbgMutableClass.methods.firstOrNull { m ->
-                m.parameterTypes.size == 2 &&
-                    m.parameterTypes[1] == "Landroid/os/Bundle;" &&
-                    m.implementation?.instructions?.any { insn ->
-                        ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string == "skip_entitlement_check"
-                    } == true
-            }
-
-            if (playMediaMethod != null) {
-                val mImpl = playMediaMethod.implementation
-                if (mImpl != null) {
-                    val insnCount = mImpl.instructions.count()
-                    for (idx in 0 until insnCount) {
-                        val insn = mImpl.instructions.elementAt(idx)
-                        val ref = (insn as? ReferenceInstruction)?.reference
-
-                        // Force bundle.getBoolean("skip_entitlement_check", false) to return true (1)
-                        if ((ref as? StringReference)?.string == "skip_entitlement_check") {
-                            for (nextIdx in idx + 1 until minOf(idx + 6, insnCount)) {
-                                val nextInsn = mImpl.instructions.elementAt(nextIdx)
-                                if (nextInsn.opcode == Opcode.MOVE_RESULT) {
-                                    val reg = (nextInsn as OneRegisterInstruction).registerA
-                                    playMediaMethod.replaceInstruction(nextIdx, "const/16 v$reg, 0x1")
-                                    break
-                                }
-                            }
-                        }
-
-                        // Force this.o.v() (isSignedIn check) to return true (1)
-                        val mRef = ref as? MethodReference
-                        if (mRef?.name == "v" && mRef.returnType == "Z" && mRef.parameterTypes.isEmpty()) {
-                            if (idx + 1 < insnCount) {
-                                val nextInsn = mImpl.instructions.elementAt(idx + 1)
-                                if (nextInsn.opcode == Opcode.MOVE_RESULT) {
-                                    val reg = (nextInsn as OneRegisterInstruction).registerA
-                                    playMediaMethod.replaceInstruction(idx + 1, "const/16 v$reg, 0x1")
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
