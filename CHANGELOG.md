@@ -1,3 +1,9 @@
+## [1.1.0-dev.20](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.19...v1.1.0-dev.20) (2026-10-11)
+
+### 🐛 Bug Fixes
+
+* **music:** add launch intent-filter to manifest and resolve media item encoder ([6cd57d0](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6cd57d097c0ecd0ee3f0f389c5fc5bb7051ba027))
+
 ## [1.1.0-dev.19](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.18...v1.1.0-dev.19) (2026-10-11)
 
 ### 🐛 Bug Fixes
