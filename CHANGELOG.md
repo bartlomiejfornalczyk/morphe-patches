@@ -1,3 +1,9 @@
+## [1.1.0-dev.16](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.15...v1.1.0-dev.16) (2026-10-11)
+
+### 🐛 Bug Fixes
+
+* **music:** provide fallback playable browse items and media actions for external media clients ([f5647e9](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/f5647e9b95e6bb2ab99c66774746e312e2aa1a3f))
+
 ## [1.1.0-dev.15](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.14...v1.1.0-dev.15) (2026-10-11)
 
 ## [1.1.0-dev.14](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.13...v1.1.0-dev.14) (2026-10-11)

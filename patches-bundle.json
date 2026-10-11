@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-11T11:26:02",
-  "description": "## [1.1.0-dev.15](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.14...v1.1.0-dev.15) (2026-10-11)",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.1.0-dev.15/patches-1.1.0-dev.15.mpp",
+  "created_at": "2026-10-11T17:18:24",
+  "description": "## [1.1.0-dev.16](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.15...v1.1.0-dev.16) (2026-10-11)\n\n### 🐛 Bug Fixes\n\n* **music:** provide fallback playable browse items and media actions for external media clients ([f5647e9](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/f5647e9b95e6bb2ab99c66774746e312e2aa1a3f))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.1.0-dev.16/patches-1.1.0-dev.16.mpp",
   "signature_download_url": "",
-  "version": "1.1.0-dev.15"
+  "version": "1.1.0-dev.16"
 }
