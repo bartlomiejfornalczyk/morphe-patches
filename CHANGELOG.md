@@ -1,3 +1,9 @@
+## [1.1.0-dev.19](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.18...v1.1.0-dev.19) (2026-10-11)
+
+### 🐛 Bug Fixes
+
+* **music:** fix media item encoding fingerprint and remove corrupting Step 7 ([2ab4a40](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/2ab4a402753ce332f94523911c69c5a9ca00dc75))
+
 ## [1.1.0-dev.18](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.17...v1.1.0-dev.18) (2026-10-11)
 
 ### 🐛 Bug Fixes
