@@ -10,5 +10,12 @@ import app.morphe.patcher.Fingerprint
  */
 object MusicBrowserServiceFingerprint : Fingerprint(
     definingClass = "Lcom/google/android/apps/youtube/music/mediabrowser/MusicBrowserService;",
-    strings = listOf("Client not allowlisted")
+    custom = { method, _ ->
+        val pCount = method.parameterTypes.size
+        (pCount == 2 || pCount == 3) &&
+            method.parameterTypes[0] == "Ljava/lang/String;" &&
+            method.parameterTypes[pCount - 1] == "Landroid/os/Bundle;" &&
+            method.returnType != "V" &&
+            method.returnType != "I"
+    }
 )
