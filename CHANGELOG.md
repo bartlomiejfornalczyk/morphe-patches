@@ -1,3 +1,9 @@
+## [1.1.0-dev.27](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.26...v1.1.0-dev.27) (2026-10-12)
+
+### ✨ New Features
+
+* **music:** add Like button to playback controls and cover art thumbnails to browse tiles ([9ca9af7](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/9ca9af7fd256c45eecce3ba6d1e34d9f04788cec))
+
 ## [1.1.0-dev.26](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.25...v1.1.0-dev.26) (2026-10-12)
 
 ### ✨ New Features
