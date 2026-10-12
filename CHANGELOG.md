@@ -1,3 +1,9 @@
+## [1.1.0-dev.24](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.23...v1.1.0-dev.24) (2026-10-12)
+
+### 🐛 Bug Fixes
+
+* **music:** route external media browser playback directly to play executor ([cf37d8d](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/cf37d8d55c8c637033e35b662ccc2a1215852014))
+
 ## [1.1.0-dev.23](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.22...v1.1.0-dev.23) (2026-10-12)
 
 ### 🐛 Bug Fixes
