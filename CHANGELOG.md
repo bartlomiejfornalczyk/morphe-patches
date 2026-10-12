@@ -1,3 +1,9 @@
+## [1.1.0-dev.21](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.20...v1.1.0-dev.21) (2026-10-12)
+
+### 🐛 Bug Fixes
+
+* **music:** uniquely target media encoder via header id and add DEFAULT category to launcher aliases ([a0af80a](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/a0af80a7646e57924c2249d47cf3ecc7eacb1207))
+
 ## [1.1.0-dev.20](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.19...v1.1.0-dev.20) (2026-10-11)
 
 ### 🐛 Bug Fixes
