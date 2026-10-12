@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-12T20:17:44",
-  "description": "## [1.1.0-dev.24](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.23...v1.1.0-dev.24) (2026-10-12)\n\n### 🐛 Bug Fixes\n\n* **music:** route external media browser playback directly to play executor ([cf37d8d](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/cf37d8d55c8c637033e35b662ccc2a1215852014))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.1.0-dev.24/patches-1.1.0-dev.24.mpp",
+  "created_at": "2026-10-12T21:29:14",
+  "description": "## [1.1.0-dev.25](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.24...v1.1.0-dev.25) (2026-10-12)\n\n### 🐛 Bug Fixes\n\n* **music:** use complete Supermix playlist id and drop unplayable placeholder tiles ([a8e4c96](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/a8e4c96ccfef05c5de8565c832bc4f0031723a77))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.1.0-dev.25/patches-1.1.0-dev.25.mpp",
   "signature_download_url": "",
-  "version": "1.1.0-dev.24"
+  "version": "1.1.0-dev.25"
 }

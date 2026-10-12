@@ -1,3 +1,9 @@
+## [1.1.0-dev.25](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.24...v1.1.0-dev.25) (2026-10-12)
+
+### 🐛 Bug Fixes
+
+* **music:** use complete Supermix playlist id and drop unplayable placeholder tiles ([a8e4c96](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/a8e4c96ccfef05c5de8565c832bc4f0031723a77))
+
 ## [1.1.0-dev.24](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.23...v1.1.0-dev.24) (2026-10-12)
 
 ### 🐛 Bug Fixes
