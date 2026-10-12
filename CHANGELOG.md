@@ -1,3 +1,9 @@
+## [1.1.0-dev.22](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.21...v1.1.0-dev.22) (2026-10-12)
+
+### 🐛 Bug Fixes
+
+* **music:** bypass car-mode gating and resolve native media encoder for playlist playback ([56ec2e2](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/56ec2e25b02c81b43cec13506744dd1717309e4d))
+
 ## [1.1.0-dev.21](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.20...v1.1.0-dev.21) (2026-10-12)
 
 ### 🐛 Bug Fixes
