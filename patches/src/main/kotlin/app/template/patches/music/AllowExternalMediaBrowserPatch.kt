@@ -448,6 +448,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                     ${makeItemSmali(playlistIdSmali("LM"), "Liked Music", "Your favorites")}
                     ${makeItemSmali(playlistIdSmali("PPSV"), "Downloaded Songs", "Offline library")}
                     ${makeItemSmali(playlistIdSmali("RDMM"), "Mixed for You", "Popular hit songs")}
+                    ${makeItemSmali(playlistIdSmali("RDCLAK5uy_kmPRjHDECIcuVwnKsx2Ng7fyNgFKWNJFs"), "The Hit List", "Top hits right now")}
+                    ${makeItemSmali(playlistIdSmali("RDCLAK5uy_lBNUteBRencHzKelu5iDHwLF6mYqjL-JU"), "Pop Certified", "Certified pop hits")}
+                    ${makeItemSmali(playlistIdSmali("PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI"), "Trending Music Videos", "What is popular now")}
+                    ${makeItemSmali(playlistIdSmali("PLrEnWoR732-BHrPp_Pm8_VleD68f9s14-"), "Popular Now", "Trending songs")}
                     ${makeItemSmali("""const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Resume current track")}
                     ${makeItemSmali("""const-string v1, "MBS_ACTION_NEXT"""", "Next Track", "Skip to next song")}
                     ${makeItemSmali("""const-string v1, "MBS_ACTION_PREV"""", "Previous Track", "Skip to previous song")}
