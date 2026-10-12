@@ -400,18 +400,18 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
             if (lkhCMethod != null && lkhCMethod.implementation != null) {
                 fun playlistIdSmali(playlistId: String): String = if (hasEncoderHelper) {
                     """
-                        const-string v1, "$playlistId"
+                        const-string v1, "${resolvePlaylistId(playlistId)}"
                         invoke-static { v1 }, ${lkhClass.type}->encodePlaylistMediaId(Ljava/lang/String;)Ljava/lang/String;
                         move-result-object v1
                     """.trimIndent()
                 } else if (mxtClass != null && mxtMethod != null) {
                     """
-                        const-string v1, "$playlistId"
+                        const-string v1, "${resolvePlaylistId(playlistId)}"
                         invoke-static { v1 }, ${mxtClass.type}->${mxtMethod.name}(Ljava/lang/String;)Ljava/lang/String;
                         move-result-object v1
                     """.trimIndent()
                 } else {
-                    """const-string v1, "$playlistId""""
+                    """const-string v1, "${resolvePlaylistId(playlistId)}""""
                 }
 
                 fun makeItemSmali(mediaIdSmali: String, title: String, subtitle: String): String = """
@@ -447,8 +447,6 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                     ${makeItemSmali(playlistIdSmali("RDTM"), "My Supermix", "Personalized endless radio")}
                     ${makeItemSmali(playlistIdSmali("LM"), "Liked Music", "Your favorites")}
                     ${makeItemSmali(playlistIdSmali("PPSV"), "Downloaded Songs", "Offline library")}
-                    ${makeItemSmali(playlistIdSmali("RDEV"), "Discover Mix", "New music for you")}
-                    ${makeItemSmali(playlistIdSmali("RDAMVM"), "New Releases", "Latest music & albums")}
                     ${makeItemSmali(playlistIdSmali("RDMM"), "Mixed for You", "Popular hit songs")}
                     ${makeItemSmali("""const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Resume current track")}
                     ${makeItemSmali("""const-string v1, "MBS_ACTION_NEXT"""", "Next Track", "Skip to next song")}
@@ -511,7 +509,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                 move-result v0
                                 if-eqz v0, :$nextLabel
                                 :cond_encode_$rawId
-                                const-string p1, "$rawId"
+                                const-string p1, "${resolvePlaylistId(rawId)}"
                                 invoke-static { p1 }, ${lkhClass.type}->encodePlaylistMediaId(Ljava/lang/String;)Ljava/lang/String;
                                 move-result-object p1
                                 goto :cond_actions_done
@@ -527,7 +525,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                 move-result v0
                                 if-eqz v0, :$nextLabel
                                 :cond_encode_$rawId
-                                const-string p1, "$rawId"
+                                const-string p1, "${resolvePlaylistId(rawId)}"
                                 invoke-static { p1 }, ${mxtClass.type}->${mxtMethod.name}(Ljava/lang/String;)Ljava/lang/String;
                                 move-result-object p1
                                 goto :cond_actions_done
@@ -751,3 +749,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
     }
 }
 
+/**
+ * YouTube Music rejects bare radio prefixes such as "RDTM". Map them to complete, playable playlist IDs.
+ */
+private fun resolvePlaylistId(id: String): String = when (id) {
+    "RDTM" -> "RDTMAK5uy_kset8DisdE7LSD4TNjEVvrKRTmG7a56sY"
+    else -> id
+}
