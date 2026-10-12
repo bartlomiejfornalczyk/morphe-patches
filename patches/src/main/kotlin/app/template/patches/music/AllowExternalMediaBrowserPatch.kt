@@ -26,6 +26,7 @@ val allowExternalMediaBrowserManifestPatch = resourcePatch(
             val manifest = doc.documentElement
             val androidNs = "http://schemas.android.com/apk/res/android"
 
+            // 1. Ensure MusicActivity has MAIN, DEFAULT, and LAUNCHER
             val activityNodes = doc.getElementsByTagName("activity")
             for (i in 0 until activityNodes.length) {
                 val activity = activityNodes.item(i) as? Element ?: continue
@@ -52,6 +53,47 @@ val allowExternalMediaBrowserManifestPatch = resourcePatch(
                     filter.appendChild(catLauncher)
                     activity.appendChild(filter)
                     break
+                }
+            }
+
+            // 2. Also ensure all activity-aliases (especially Morphe custom branding launcher aliases)
+            // with action.MAIN have category.DEFAULT so external apps (Google Maps, Android Auto)
+            // can launch the active alias via new Intent(ACTION_MAIN).setPackage(...) without ActivityNotFoundException.
+            val aliasNodes = doc.getElementsByTagName("activity-alias")
+            for (i in 0 until aliasNodes.length) {
+                val alias = aliasNodes.item(i) as? Element ?: continue
+                val filterNodes = alias.getElementsByTagName("intent-filter")
+                for (j in 0 until filterNodes.length) {
+                    val filter = filterNodes.item(j) as? Element ?: continue
+                    val actions = filter.getElementsByTagName("action")
+                    var hasMain = false
+                    for (k in 0 until actions.length) {
+                        val act = actions.item(k) as? Element ?: continue
+                        val actName = act.getAttributeNS(androidNs, "name").ifEmpty { act.getAttribute("android:name") }
+                        if (actName == "android.intent.action.MAIN") {
+                            hasMain = true
+                            break
+                        }
+                    }
+                    if (hasMain) {
+                        val categories = filter.getElementsByTagName("category")
+                        var hasDefault = false
+                        for (k in 0 until categories.length) {
+                            val cat = categories.item(k) as? Element ?: continue
+                            val catName = cat.getAttributeNS(androidNs, "name").ifEmpty { cat.getAttribute("android:name") }
+                            if (catName == "android.intent.category.DEFAULT") {
+                                hasDefault = true
+                                break
+                            }
+                        }
+                        if (!hasDefault) {
+                            val catDefault = doc.createElement("category").apply {
+                                setAttribute("android:name", "android.intent.category.DEFAULT")
+                                setAttributeNS(androidNs, "android:name", "android.intent.category.DEFAULT")
+                            }
+                            filter.appendChild(catDefault)
+                        }
+                    }
                 }
             }
         }
@@ -224,21 +266,20 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
 
             if (lkhCMethod != null) {
                 if (lkhCMethod.implementation != null) {
-                    // Discover the native media item encoder (mxt.g / ixx.g) if present
+                    // Discover the native media item encoder (mxt / ixx / hkd) if present
                     val mxtClass = MediaBrowserCustomActionsFingerprint.classDefOrNull
+                        ?: classDefByStrings("__DETAILS_HEADER_ID__").firstOrNull()
                         ?: classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull { clazz ->
                             clazz.methods.any { m ->
-                                m.name == "g" &&
+                                (m.accessFlags and AccessFlags.STATIC.value != 0) &&
                                     m.parameterTypes == listOf("Ljava/lang/String;") &&
-                                    m.returnType == "Ljava/lang/String;" &&
-                                    (m.accessFlags and AccessFlags.STATIC.value != 0)
+                                    m.returnType == "Ljava/lang/String;"
                             }
                         }
                     val mxtEncodeMethod = mxtClass?.methods?.firstOrNull { m ->
-                        m.name == "g" &&
+                        (m.accessFlags and AccessFlags.STATIC.value != 0) &&
                             m.parameterTypes == listOf("Ljava/lang/String;") &&
-                            m.returnType == "Ljava/lang/String;" &&
-                            (m.accessFlags and AccessFlags.STATIC.value != 0)
+                            m.returnType == "Ljava/lang/String;"
                     }
 
                     val lmMediaIdSmali = if (mxtClass != null && mxtEncodeMethod != null) {
@@ -387,19 +428,18 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                 }
 
                 val mxtClass = MediaBrowserCustomActionsFingerprint.classDefOrNull
+                    ?: classDefByStrings("__DETAILS_HEADER_ID__").firstOrNull()
                     ?: classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull { clazz ->
                         clazz.methods.any { m ->
-                            m.name == "g" &&
+                            (m.accessFlags and AccessFlags.STATIC.value != 0) &&
                                 m.parameterTypes == listOf("Ljava/lang/String;") &&
-                                m.returnType == "Ljava/lang/String;" &&
-                                (m.accessFlags and AccessFlags.STATIC.value != 0)
+                                m.returnType == "Ljava/lang/String;"
                         }
                     }
                 val mxtEncodeMethod = mxtClass?.methods?.firstOrNull { m ->
-                    m.name == "g" &&
+                    (m.accessFlags and AccessFlags.STATIC.value != 0) &&
                         m.parameterTypes == listOf("Ljava/lang/String;") &&
-                        m.returnType == "Ljava/lang/String;" &&
-                        (m.accessFlags and AccessFlags.STATIC.value != 0)
+                        m.returnType == "Ljava/lang/String;"
                 }
 
                 if (onPlayMethod != null && onSkipNextMethod != null && onSkipPrevMethod != null) {
@@ -443,7 +483,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                 goto :cond_actions_done
                             """.trimIndent())
                         } else {
-                            appendLine("return-void")
+                            appendLine("""
+                                invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
+                                return-void
+                            """.trimIndent())
                         }
                         appendLine("""
                             :cond_check_supermix
@@ -460,7 +503,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                 goto :cond_actions_done
                             """.trimIndent())
                         } else {
-                            appendLine("return-void")
+                            appendLine("""
+                                invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
+                                return-void
+                            """.trimIndent())
                         }
                         appendLine("""
                             :cond_check_offline
@@ -477,7 +523,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                 goto :cond_actions_done
                             """.trimIndent())
                         } else {
-                            appendLine("return-void")
+                            appendLine("""
+                                invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
+                                return-void
+                            """.trimIndent())
                         }
                         appendLine("""
                             :cond_check_discover
@@ -494,7 +543,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                 goto :cond_actions_done
                             """.trimIndent())
                         } else {
-                            appendLine("return-void")
+                            appendLine("""
+                                invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
+                                return-void
+                            """.trimIndent())
                         }
                         appendLine("""
                             :cond_check_new
@@ -511,7 +563,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                 goto :cond_actions_done
                             """.trimIndent())
                         } else {
-                            appendLine("return-void")
+                            appendLine("""
+                                invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
+                                return-void
+                            """.trimIndent())
                         }
                         appendLine("""
                             :cond_check_charts
@@ -528,7 +583,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                                 goto :cond_actions_done
                             """.trimIndent())
                         } else {
-                            appendLine("return-void")
+                            appendLine("""
+                                invoke-virtual { p0 }, ${lagClass.type}->${onPlayMethod.name}()V
+                                return-void
+                            """.trimIndent())
                         }
                         appendLine("""
                             :cond_actions_done
