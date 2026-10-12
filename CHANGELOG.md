@@ -1,3 +1,9 @@
+## [1.1.0-dev.26](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.25...v1.1.0-dev.26) (2026-10-12)
+
+### ✨ New Features
+
+* **music:** add public playlist tiles to external media browser ([693f045](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/693f045ef26967a492488a521da80302890213d8))
+
 ## [1.1.0-dev.25](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.24...v1.1.0-dev.25) (2026-10-12)
 
 ### 🐛 Bug Fixes
