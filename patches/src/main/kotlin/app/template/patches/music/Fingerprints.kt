@@ -31,11 +31,11 @@ object MediaSessionCallbackFingerprint : Fingerprint(
 )
 
 /**
- * Matches MediaBrowserItemFactory / MediaItemEncoding (mxt / ixx / hkd) in YouTube Music.
- * Distinctive constant "__DETAILS_HEADER_ID__" is uniquely present in this class across all architectures.
+ * Matches MediaBrowserItemFactory / MediaItemEncoding (mxt / ixx) in YouTube Music.
+ * Distinctive constant "offline_PPSV" is uniquely present in this class across all architectures.
  */
 object MediaBrowserCustomActionsFingerprint : Fingerprint(
-    strings = listOf("__DETAILS_HEADER_ID__")
+    strings = listOf("offline_PPSV")
 )
 
 

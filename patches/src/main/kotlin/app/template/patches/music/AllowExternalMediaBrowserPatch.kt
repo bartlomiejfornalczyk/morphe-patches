@@ -266,16 +266,37 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
 
             if (lkhCMethod != null) {
                 if (lkhCMethod.implementation != null) {
-                    // Discover the native media item encoder (mxt / ixx / hkd) if present
-                    val mxtClass = MediaBrowserCustomActionsFingerprint.classDefOrNull
-                        ?: classDefByStrings("__DETAILS_HEADER_ID__").firstOrNull()
-                        ?: classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull { clazz ->
+                    // Discover the native media item encoder (mxt / ixx) if present
+                    val mxtClass = listOfNotNull(
+                        MediaBrowserCustomActionsFingerprint.classDefOrNull,
+                        classDefByStrings("offline_PPSV").firstOrNull { clazz ->
+                            clazz.methods.any { m ->
+                                (m.accessFlags and AccessFlags.STATIC.value != 0) &&
+                                    m.parameterTypes == listOf("Ljava/lang/String;") &&
+                                    m.returnType == "Ljava/lang/String;"
+                            }
+                        },
+                        classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull { clazz ->
+                            clazz.methods.any { m ->
+                                (m.accessFlags and AccessFlags.STATIC.value != 0) &&
+                                    m.parameterTypes == listOf("Ljava/lang/String;") &&
+                                    m.returnType == "Ljava/lang/String;"
+                            }
+                        },
+                        classDefByStrings("__DETAILS_HEADER_ID__").firstOrNull { clazz ->
                             clazz.methods.any { m ->
                                 (m.accessFlags and AccessFlags.STATIC.value != 0) &&
                                     m.parameterTypes == listOf("Ljava/lang/String;") &&
                                     m.returnType == "Ljava/lang/String;"
                             }
                         }
+                    ).firstOrNull { clazz ->
+                        clazz.methods.any { m ->
+                            (m.accessFlags and AccessFlags.STATIC.value != 0) &&
+                                m.parameterTypes == listOf("Ljava/lang/String;") &&
+                                m.returnType == "Ljava/lang/String;"
+                        }
+                    }
                     val mxtEncodeMethod = mxtClass?.methods?.firstOrNull { m ->
                         (m.accessFlags and AccessFlags.STATIC.value != 0) &&
                             m.parameterTypes == listOf("Ljava/lang/String;") &&
@@ -427,15 +448,36 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                         } == true
                 }
 
-                val mxtClass = MediaBrowserCustomActionsFingerprint.classDefOrNull
-                    ?: classDefByStrings("__DETAILS_HEADER_ID__").firstOrNull()
-                    ?: classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull { clazz ->
+                val mxtClass = listOfNotNull(
+                    MediaBrowserCustomActionsFingerprint.classDefOrNull,
+                    classDefByStrings("offline_PPSV").firstOrNull { clazz ->
+                        clazz.methods.any { m ->
+                            (m.accessFlags and AccessFlags.STATIC.value != 0) &&
+                                m.parameterTypes == listOf("Ljava/lang/String;") &&
+                                m.returnType == "Ljava/lang/String;"
+                        }
+                    },
+                    classDefByStrings("com.google.android.apps.youtube.music.mediabrowser.custom_actions").firstOrNull { clazz ->
+                        clazz.methods.any { m ->
+                            (m.accessFlags and AccessFlags.STATIC.value != 0) &&
+                                m.parameterTypes == listOf("Ljava/lang/String;") &&
+                                m.returnType == "Ljava/lang/String;"
+                        }
+                    },
+                    classDefByStrings("__DETAILS_HEADER_ID__").firstOrNull { clazz ->
                         clazz.methods.any { m ->
                             (m.accessFlags and AccessFlags.STATIC.value != 0) &&
                                 m.parameterTypes == listOf("Ljava/lang/String;") &&
                                 m.returnType == "Ljava/lang/String;"
                         }
                     }
+                ).firstOrNull { clazz ->
+                    clazz.methods.any { m ->
+                        (m.accessFlags and AccessFlags.STATIC.value != 0) &&
+                            m.parameterTypes == listOf("Ljava/lang/String;") &&
+                            m.returnType == "Ljava/lang/String;"
+                    }
+                }
                 val mxtEncodeMethod = mxtClass?.methods?.firstOrNull { m ->
                     (m.accessFlags and AccessFlags.STATIC.value != 0) &&
                         m.parameterTypes == listOf("Ljava/lang/String;") &&
@@ -642,6 +684,73 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                             }
                         }
                         break
+                    }
+                }
+            }
+        }
+
+        // 8. In MusicMediaSessionPlayerController (lbg.i / hak.h):
+        // Bypass account check (kym.c) and car-mode entitlement gating (kym.d)
+        // so playback requests unconditionally execute ((bacc) this.e.gG()).b(azmi) and ((bacw) this.d.gG()).ah()
+        val lbgClass = classDefByStrings("intent_extra_command_bundle").firstOrNull { clazz ->
+            clazz.methods.any { m ->
+                m.name == "handleSignOutEvent" || m.implementation?.instructions?.any { insn ->
+                    ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string == "skip_entitlement_check"
+                } == true
+            }
+        } ?: classDefByStrings("skip_entitlement_check").firstOrNull { clazz ->
+            clazz.methods.any { m -> m.name == "handleSignOutEvent" }
+        }
+
+        if (lbgClass != null) {
+            val lbgMutableClass = mutableClassDefBy(lbgClass)
+            val lbgPlayMethod = lbgMutableClass.methods.firstOrNull { m ->
+                m.implementation?.instructions?.any { insn ->
+                    ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string == "skip_entitlement_check"
+                } == true
+            }
+
+            if (lbgPlayMethod?.implementation != null) {
+                // A. Force bundle.getBoolean("skip_entitlement_check", false) to return 1 (true):
+                // This ensures car mode (driving mode in Google Maps) directly enqueues and plays the playlist.
+                val impl = lbgPlayMethod.implementation!!
+                for (i in 0 until impl.instructions.count()) {
+                    val insn = impl.instructions.elementAt(i)
+                    val strRef = ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string
+                    if (strRef == "skip_entitlement_check") {
+                        for (j in i + 1 until minOf(i + 6, impl.instructions.count())) {
+                            val nextInsn = impl.instructions.elementAt(j)
+                            if (nextInsn.opcode == Opcode.MOVE_RESULT) {
+                                val reg = (nextInsn as OneRegisterInstruction).registerA
+                                lbgPlayMethod.addInstructionsWithLabels(j + 1, "const/4 v$reg, 0x1")
+                                break
+                            }
+                        }
+                        break
+                    }
+                }
+
+                // B. Bypass AccountIdentityManager.isSignedIn() check:
+                // Find the first return-object instruction (which returns AUTH_REQUIRED / kym.c)
+                // and the move-result instruction before it, forcing its register to 1 (true).
+                val updatedImpl = lbgPlayMethod.implementation!!
+                val count = updatedImpl.instructions.count()
+                var firstReturnObjectIdx = -1
+                for (i in 0 until minOf(50, count)) {
+                    val insn = updatedImpl.instructions.elementAt(i)
+                    if (insn.opcode == Opcode.RETURN_OBJECT) {
+                        firstReturnObjectIdx = i
+                        break
+                    }
+                }
+                if (firstReturnObjectIdx != -1) {
+                    for (i in (firstReturnObjectIdx - 1) downTo maxOf(0, firstReturnObjectIdx - 10)) {
+                        val insn = updatedImpl.instructions.elementAt(i)
+                        if (insn.opcode == Opcode.MOVE_RESULT) {
+                            val reg = (insn as OneRegisterInstruction).registerA
+                            lbgPlayMethod.addInstructionsWithLabels(i + 1, "const/4 v$reg, 0x1")
+                            break
+                        }
                     }
                 }
             }
