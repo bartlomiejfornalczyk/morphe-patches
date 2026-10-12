@@ -12,6 +12,7 @@ import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
@@ -585,12 +586,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
 
                         appendLine("""
                             :cond_actions_done
-                            if-nez p2, :cond_bundle_init
-                            goto :cond_bundle_set_skip
-                            :cond_bundle_init
+                            if-nez p2, :cond_bundle_has_bundle
                             new-instance p2, Landroid/os/Bundle;
                             invoke-direct { p2 }, Landroid/os/Bundle;-><init>()V
-                            :cond_bundle_set_skip
+                            :cond_bundle_has_bundle
                             const-string v0, "skip_entitlement_check"
                             const/4 v1, 0x1
                             invoke-virtual { p2, v0, v1 }, Landroid/os/Bundle;->putBoolean(Ljava/lang/String;Z)V
@@ -636,8 +635,8 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
         }
 
         // 8. In MusicMediaSessionPlayerController (lbg.i / hak.h):
-        // Bypass account check (isSignedIn) and entitlement check (skip_entitlement_check)
-        // so playback requests unconditionally execute ((bacc) this.e.gG()).b(azmi) and ((bacw) this.d.gG()).ah()
+        // Bypass entitlement check (onPlayEntitlementCheck / hak.a / lbg.b) and player state routing (hak.h / lbg.i)
+        // so that external playback requests unconditionally enqueue and trigger playback.
         val lbgClass = classDefByStrings("intent_extra_command_bundle").firstOrNull { clazz ->
             clazz.methods.any { m ->
                 m.name == "handleSignOutEvent" || m.implementation?.instructions?.any { insn ->
@@ -657,41 +656,92 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
             }
 
             if (lbgPlayMethod?.implementation != null) {
-                // A. Force bundle.getBoolean("skip_entitlement_check", false) to return 1 (true):
-                val impl = lbgPlayMethod.implementation!!
-                for (i in 0 until impl.instructions.count()) {
-                    val insn = impl.instructions.elementAt(i)
-                    val strRef = ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string
-                    if (strRef == "skip_entitlement_check") {
-                        for (j in i + 1 until minOf(i + 6, impl.instructions.count())) {
-                            val nextInsn = impl.instructions.elementAt(j)
-                            if (nextInsn.opcode == Opcode.MOVE_RESULT) {
-                                val reg = (nextInsn as OneRegisterInstruction).registerA
-                                lbgPlayMethod.addInstructionsWithLabels(j + 1, "const/4 v$reg, 0x1")
-                                break
+                val returnType = lbgPlayMethod.returnType
+
+                // A. Patch entitlement check method (hak.a / lbg.b) called by onPlay():
+                // Find resultClass (gzs / kym) that defines the success/error MediaSessionResult fields:
+                val resultClass = lbgPlayMethod.implementation?.instructions?.mapNotNull {
+                    ((it as? ReferenceInstruction)?.reference as? FieldReference)
+                }?.firstOrNull { it.type == returnType && it.name == "a" }?.definingClass
+
+                if (resultClass != null) {
+                    val entitlementCheckMethod = lbgMutableClass.methods.firstOrNull { m ->
+                        m.parameterTypes.isEmpty() && m.returnType == returnType &&
+                            m.implementation?.instructions?.any { insn ->
+                                val fr = (insn as? ReferenceInstruction)?.reference as? FieldReference
+                                fr?.definingClass == resultClass && fr.name == "d"
+                            } == true
+                    }
+
+                    if (entitlementCheckMethod?.implementation != null) {
+                        val count = entitlementCheckMethod.implementation!!.instructions.count()
+                        if (count >= 2) {
+                            entitlementCheckMethod.replaceInstruction(0, "sget-object v0, $resultClass->a:$returnType")
+                            entitlementCheckMethod.replaceInstruction(1, "return-object v0")
+                            for (idx in 2 until count) {
+                                entitlementCheckMethod.replaceInstruction(idx, "nop")
                             }
                         }
+                    }
+                }
+
+                // B. In playMethod (hak.h / lbg.i):
+                val impl = lbgPlayMethod.implementation!!
+                val insns = impl.instructions.toList()
+
+                // 1. Bypass sign-in check (move-result before first return-object):
+                val firstReturnIdx = insns.indexOfFirst { it.opcode == Opcode.RETURN_OBJECT }
+                if (firstReturnIdx in 1..50) {
+                    for (i in (firstReturnIdx - 1) downTo maxOf(0, firstReturnIdx - 10)) {
+                        val insn = insns[i]
+                        if (insn.opcode == Opcode.MOVE_RESULT) {
+                            val reg = (insn as OneRegisterInstruction).registerA
+                            lbgPlayMethod.replaceInstruction(i, "const/4 v$reg, 0x1")
+                            break
+                        }
+                    }
+                }
+
+                // 2. Bypass active-player jump to 402 and route directly to skip_entitlement_check branch:
+                var skipStrIdx = -1
+                for (i in insns.indices) {
+                    val strRef = ((insns[i] as? ReferenceInstruction)?.reference as? StringReference)?.string
+                    if (strRef == "skip_entitlement_check") {
+                        skipStrIdx = i
                         break
                     }
                 }
 
-                // B. Bypass AccountIdentityManager.isSignedIn() and omt.i() checks:
-                // Find all return-object instructions in the first 50 instructions and force
-                // the move-result instructions before them to 1 (true) so early error returns are bypassed.
-                val updatedImpl = lbgPlayMethod.implementation!!
-                val count = updatedImpl.instructions.count()
-                val returnIndices = mutableListOf<Int>()
-                for (i in 0 until minOf(50, count)) {
-                    if (updatedImpl.instructions.elementAt(i).opcode == Opcode.RETURN_OBJECT) {
-                        returnIndices.add(i)
+                if (skipStrIdx != -1) {
+                    // Preceding 2 MOVE_RESULT instructions are player active/playing checks (p() and o()):
+                    var mr2Idx = -1
+                    var mr1Idx = -1
+                    for (i in (skipStrIdx - 1) downTo 0) {
+                        if (insns[i].opcode == Opcode.MOVE_RESULT) {
+                            if (mr2Idx == -1) {
+                                mr2Idx = i
+                            } else if (mr1Idx == -1) {
+                                mr1Idx = i
+                                break
+                            }
+                        }
                     }
-                }
-                for (retIdx in returnIndices) {
-                    for (i in (retIdx - 1) downTo maxOf(0, retIdx - 10)) {
-                        val insn = updatedImpl.instructions.elementAt(i)
-                        if (insn.opcode == Opcode.MOVE_RESULT) {
-                            val reg = (insn as OneRegisterInstruction).registerA
-                            lbgPlayMethod.addInstructionsWithLabels(i + 1, "const/4 v$reg, 0x1")
+
+                    if (mr1Idx != -1) {
+                        val reg1 = (insns[mr1Idx] as OneRegisterInstruction).registerA
+                        lbgPlayMethod.replaceInstruction(mr1Idx, "const/4 v$reg1, 0x0")
+                    }
+                    if (mr2Idx != -1) {
+                        val reg2 = (insns[mr2Idx] as OneRegisterInstruction).registerA
+                        lbgPlayMethod.replaceInstruction(mr2Idx, "const/4 v$reg2, 0x0")
+                    }
+
+                    // 3. Force move-result after getBoolean("skip_entitlement_check") to 1 (true)
+                    // so it jumps directly to playlist enqueue (Labgu.g) and play (Labhc.ab):
+                    for (j in (skipStrIdx + 1) until minOf(skipStrIdx + 6, insns.size)) {
+                        if (insns[j].opcode == Opcode.MOVE_RESULT) {
+                            val regSkip = (insns[j] as OneRegisterInstruction).registerA
+                            lbgPlayMethod.replaceInstruction(j, "const/4 v$regSkip, 0x1")
                             break
                         }
                     }
