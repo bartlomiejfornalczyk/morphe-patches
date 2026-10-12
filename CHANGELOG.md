@@ -1,3 +1,9 @@
+## [1.1.0-dev.23](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.22...v1.1.0-dev.23) (2026-10-12)
+
+### 🐛 Bug Fixes
+
+* **music:** restore playlist tile playback and partner cert checks for external media browser ([87706a5](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/87706a50491c1212d80eefe2912ef12169a7df28))
+
 ## [1.1.0-dev.22](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.21...v1.1.0-dev.22) (2026-10-12)
 
 ### 🐛 Bug Fixes
