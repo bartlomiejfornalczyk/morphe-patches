@@ -1,3 +1,9 @@
+## [1.1.0-dev.31](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.30...v1.1.0-dev.31) (2026-10-13)
+
+### ✨ New Features
+
+* **music:** add tile toggles and prioritize top 9 driving mode tiles ([1968534](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/19685345ae33da3d9f2ac67fb0d12202543f1741))
+
 ## [1.1.0-dev.30](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.29...v1.1.0-dev.30) (2026-10-13)
 
 ### ✨ New Features
