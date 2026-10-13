@@ -1,3 +1,9 @@
+## [1.1.0-dev.29](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.28...v1.1.0-dev.29) (2026-10-13)
+
+### ✨ New Features
+
+* **music:** use Google FIFE URLs for tile covers and add Like controls for driving mode ([6526f1e](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6526f1e8cca23b007068944c42454cfd8005d99c))
+
 ## [1.1.0-dev.28](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.27...v1.1.0-dev.28) (2026-10-13)
 
 ### 🐛 Bug Fixes

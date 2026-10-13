@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-13T09:22:24",
-  "description": "## [1.1.0-dev.28](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.27...v1.1.0-dev.28) (2026-10-13)\n\n### 🐛 Bug Fixes\n\n* **music:** set register count to 2 for Waze action override ([8d42d5f](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/8d42d5f5e3430a5880fe40ffeeebd1e58d14d7cd))",
-  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.1.0-dev.28/patches-1.1.0-dev.28.mpp",
+  "created_at": "2026-10-13T10:21:15",
+  "description": "## [1.1.0-dev.29](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.28...v1.1.0-dev.29) (2026-10-13)\n\n### ✨ New Features\n\n* **music:** use Google FIFE URLs for tile covers and add Like controls for driving mode ([6526f1e](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/6526f1e8cca23b007068944c42454cfd8005d99c))",
+  "download_url": "https://github.com/bartlomiejfornalczyk/morphe-patches/releases/download/v1.1.0-dev.29/patches-1.1.0-dev.29.mpp",
   "signature_download_url": "",
-  "version": "1.1.0-dev.28"
+  "version": "1.1.0-dev.29"
 }
