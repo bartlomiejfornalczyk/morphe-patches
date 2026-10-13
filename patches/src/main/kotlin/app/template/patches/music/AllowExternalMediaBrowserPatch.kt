@@ -2,6 +2,7 @@ package app.template.patches.music
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
@@ -116,6 +117,79 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
         COMPATIBILITY_YOUTUBE_MUSIC
     )
     dependsOn(allowExternalMediaBrowserManifestPatch)
+
+    val tileSupermix by booleanOption(
+        key = "tileSupermix",
+        default = true,
+        title = "Tile: My Supermix",
+        description = "Personalized endless radio mix in external media browsers (Google Maps, Android Auto)."
+    )
+    val tileLikedMusic by booleanOption(
+        key = "tileLikedMusic",
+        default = true,
+        title = "Tile: Liked Music",
+        description = "Your favorite liked songs library in external media browsers."
+    )
+    val tileLikeCurrentSong by booleanOption(
+        key = "tileLikeCurrentSong",
+        default = true,
+        title = "Tile: Like Current Song",
+        description = "Quick thumbs-up action tile for the currently playing track in external media browsers."
+    )
+    val tileResumePlayback by booleanOption(
+        key = "tileResumePlayback",
+        default = true,
+        title = "Tile: Resume Playback",
+        description = "Quick resume / unpause action tile in external media browsers."
+    )
+    val tileDownloadedSongs by booleanOption(
+        key = "tileDownloadedSongs",
+        default = true,
+        title = "Tile: Downloaded Songs",
+        description = "Offline downloaded music library in external media browsers."
+    )
+    val tileMixedForYou by booleanOption(
+        key = "tileMixedForYou",
+        default = true,
+        title = "Tile: Mixed for You",
+        description = "Mixed for you road trip radio in external media browsers."
+    )
+    val tilePopCertified by booleanOption(
+        key = "tilePopCertified",
+        default = true,
+        title = "Tile: Pop Certified",
+        description = "Certified pop hits playlist in external media browsers."
+    )
+    val tileDancePartyHits by booleanOption(
+        key = "tileDancePartyHits",
+        default = true,
+        title = "Tile: Dance Party Hits",
+        description = "Upbeat dance & EDM anthems in external media browsers."
+    )
+    val tilePumpUpEnergy by booleanOption(
+        key = "tilePumpUpEnergy",
+        default = true,
+        title = "Tile: Pump-Up Energy",
+        description = "High energy workout & driving hits in external media browsers."
+    )
+    val tileTrending20 by booleanOption(
+        key = "tileTrending20",
+        default = false,
+        title = "Tile: Trending 20",
+        description = "Top 20 trending chart playlist in external media browsers."
+    )
+    val tileTrendingMusicVideos by booleanOption(
+        key = "tileTrendingMusicVideos",
+        default = false,
+        title = "Tile: Trending Music Videos",
+        description = "Top trending music videos playlist in external media browsers."
+    )
+    val tilePopularRightNow by booleanOption(
+        key = "tilePopularRightNow",
+        default = false,
+        title = "Tile: Popular Right Now",
+        description = "Popular hit songs playlist in external media browsers."
+    )
 
     execute {
         // 0. Bypass certificate checks (Google Maps, Android Auto partner certs & Google signed check)
@@ -444,6 +518,23 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                     """.trimIndent()
                 }
 
+                val itemsSmali = buildString {
+                    if (tileSupermix == true) appendLine(makeItemSmali(playlistIdSmali("RDTM"), "My Supermix", "Personalized endless radio", "https://yt3.googleusercontent.com/a_Psx_TQyLsZ5S5ybBCtyK2ArHwLUN4p8LjmWL3wvtNc-xQaG447M3nKViimyjAsW3pQ2GdBO8L4Jj4=w544-h544-l90-rj"))
+                    if (tileLikedMusic == true) appendLine(makeItemSmali(playlistIdSmali("LM"), "Liked Music", "Your favorites", "https://play-lh.googleusercontent.com/JX8RAoUFybCYzCLp5bNhqeXCmhqqzXf4sX81-XsokkOJXqZyw5N83wpzrtHlILhFBkFmuhhM51z9wSLXQrEa=w512-h512"))
+                    if (tileLikeCurrentSong == true) appendLine(makeItemSmali("""const-string v1, "MBS_ACTION_LIKE"""", "Like Current Song", "Thumbs up this track", "https://play-lh.googleusercontent.com/UvyJtlgvDLs2VIcOeg-aFDjB3XETm5Li0YZA6JaUOtUgcM_9ehzovpbLuof618tWfkIxW65vJcTFmFc6ak7uMw=w512-h512"))
+                    if (tileResumePlayback == true) appendLine(makeItemSmali("""const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Resume current track", "https://play-lh.googleusercontent.com/MyptZXmcCyF59phIWPsNCfHq6zSO_ojEdw_4rMYYWPOGdikSjqeOXcoszBZ053VYpINe5K7ZR9KV1nkFWgxdOw=w512-h512"))
+                    if (tileDownloadedSongs == true) appendLine(makeItemSmali(playlistIdSmali("PPSV"), "Downloaded Songs", "Offline library", "https://play-lh.googleusercontent.com/cjyFg0ABFwOFdLf1GsCGRvOoAANqCnIsFCgwGe8g-FPVaQ5STxoqZAKQOph44Hlx-gO0GMx8AZC9AY1VUBiO=w512-h512"))
+                    if (tileMixedForYou == true) appendLine(makeItemSmali(playlistIdSmali("RDMM"), "Mixed for You", "Rock on the road hits", "https://yt3.googleusercontent.com/BSIKjtCY-sMw8NpepPWv7gGwk8ij7TvDH785SAdfEsQ6Zf1AVT1FKOYbSB3FlEAeeiKPwvfLNNkIktU=w544-h544-l90-rj"))
+                    if (tilePopCertified == true) appendLine(makeItemSmali(playlistIdSmali("RDCLAK5uy_lBNUteBRencHzKelu5iDHwLF6mYqjL-JU"), "Pop Certified", "Certified pop hits", "https://yt3.googleusercontent.com/H-a23V_iN1LA7Vi8r8H5grE9FmjUTIsy_WjzUO_5hYxNT4TRZNkBXSFKlNHLab3kKYpBlsqqhcCuhWE=w544-h544-l90-rj"))
+                    if (tileDancePartyHits == true) appendLine(makeItemSmali(playlistIdSmali("RDCLAK5uy_mkXiaMATud8GJQ3aX7f0nCeCqvehA9wTQ"), "Dance Party Hits", "Upbeat dance anthems", "https://yt3.googleusercontent.com/fcBazTj_SCl0s9rsgsI2x8d0UKr_vxHEuu35GYcua25DbjK4HpqV2ZxoykjwhdAVH34GJVq-5bEADJM=w544-h544-l90-rj"))
+                    if (tilePumpUpEnergy == true) appendLine(makeItemSmali(playlistIdSmali("RDCLAK5uy_mVJ3RRi_YBfUJnZnQxLAedQQcXHujbUcg"), "Pump-Up Energy", "High energy favorites", "https://yt3.googleusercontent.com/PiHeLTzGupMv0PkTI0dg-sstkzOx8yNkBOEfV67yP_sUkJtXLRk4JO8dwhz18rZAz9gHJSAGHeztsJ4=w544-h544-l90-rj"))
+                    if (tileTrending20 == true) appendLine(makeItemSmali(playlistIdSmali("PLFgquLnL59alW3xmYiWRaoz0oM3H17Lth"), "Trending 20", "Top charts right now", "https://yt3.googleusercontent.com/Fesjpk0-6-rFF02i0bnutv--ILcObw-4y8hhKqjBbfZteZkIEFcJKXJgFVcILo-9TewdC67rTJ8=s576"))
+                    if (tileTrendingMusicVideos == true) appendLine(makeItemSmali(playlistIdSmali("PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI"), "Trending Music Videos", "Popular video hits", "https://yt3.googleusercontent.com/12Z2lesRDLk4t_Pd-lMs-TlvEJBFLIOv1Uh9mJUUneRqYVRRSjAkjcKkCNF7f3dejleGz77F7xN5=s576"))
+                    if (tilePopularRightNow == true) appendLine(makeItemSmali(playlistIdSmali("PLrEnWoR732-BHrPp_Pm8_VleD68f9s14-"), "Popular Right Now", "Trending hit songs", "https://yt3.googleusercontent.com/i22CwRBnI9UZYAPf3Cuxcx0qCrzb_G5lzdIjYSiHtPNuIHPe8DQizfMmY6FX1-PI6sLMG1Sy9yY=s576"))
+                }.ifBlank {
+                    makeItemSmali(playlistIdSmali("RDTM"), "My Supermix", "Personalized endless radio", "https://yt3.googleusercontent.com/a_Psx_TQyLsZ5S5ybBCtyK2ArHwLUN4p8LjmWL3wvtNc-xQaG447M3nKViimyjAsW3pQ2GdBO8L4Jj4=w544-h544-l90-rj")
+                }
+
                 val fallbackSmali = """
                     if-nez p1, :cond_check_empty
                     goto :cond_create_fallback
@@ -457,18 +548,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                     new-instance p1, Ljava/util/ArrayList;
                     invoke-direct { p1 }, Ljava/util/ArrayList;-><init>()V
 
-                    ${makeItemSmali(playlistIdSmali("RDTM"), "My Supermix", "Personalized endless radio", "https://yt3.googleusercontent.com/a_Psx_TQyLsZ5S5ybBCtyK2ArHwLUN4p8LjmWL3wvtNc-xQaG447M3nKViimyjAsW3pQ2GdBO8L4Jj4=w544-h544-l90-rj")}
-                    ${makeItemSmali(playlistIdSmali("LM"), "Liked Music", "Your favorites", "https://play-lh.googleusercontent.com/JX8RAoUFybCYzCLp5bNhqeXCmhqqzXf4sX81-XsokkOJXqZyw5N83wpzrtHlILhFBkFmuhhM51z9wSLXQrEa=w512-h512")}
-                    ${makeItemSmali(playlistIdSmali("PPSV"), "Downloaded Songs", "Offline library", "https://play-lh.googleusercontent.com/cjyFg0ABFwOFdLf1GsCGRvOoAANqCnIsFCgwGe8g-FPVaQ5STxoqZAKQOph44Hlx-gO0GMx8AZC9AY1VUBiO=w512-h512")}
-                    ${makeItemSmali(playlistIdSmali("RDMM"), "Mixed for You", "Rock on the road hits", "https://yt3.googleusercontent.com/BSIKjtCY-sMw8NpepPWv7gGwk8ij7TvDH785SAdfEsQ6Zf1AVT1FKOYbSB3FlEAeeiKPwvfLNNkIktU=w544-h544-l90-rj")}
-                    ${makeItemSmali(playlistIdSmali("RDCLAK5uy_lBNUteBRencHzKelu5iDHwLF6mYqjL-JU"), "Pop Certified", "Certified pop hits", "https://yt3.googleusercontent.com/H-a23V_iN1LA7Vi8r8H5grE9FmjUTIsy_WjzUO_5hYxNT4TRZNkBXSFKlNHLab3kKYpBlsqqhcCuhWE=w544-h544-l90-rj")}
-                    ${makeItemSmali(playlistIdSmali("RDCLAK5uy_mkXiaMATud8GJQ3aX7f0nCeCqvehA9wTQ"), "Dance Party Hits", "Upbeat dance anthems", "https://yt3.googleusercontent.com/fcBazTj_SCl0s9rsgsI2x8d0UKr_vxHEuu35GYcua25DbjK4HpqV2ZxoykjwhdAVH34GJVq-5bEADJM=w544-h544-l90-rj")}
-                    ${makeItemSmali(playlistIdSmali("RDCLAK5uy_mVJ3RRi_YBfUJnZnQxLAedQQcXHujbUcg"), "Pump-Up Energy", "High energy favorites", "https://yt3.googleusercontent.com/PiHeLTzGupMv0PkTI0dg-sstkzOx8yNkBOEfV67yP_sUkJtXLRk4JO8dwhz18rZAz9gHJSAGHeztsJ4=w544-h544-l90-rj")}
-                    ${makeItemSmali(playlistIdSmali("PLFgquLnL59alW3xmYiWRaoz0oM3H17Lth"), "Trending 20", "Top charts right now", "https://yt3.googleusercontent.com/Fesjpk0-6-rFF02i0bnutv--ILcObw-4y8hhKqjBbfZteZkIEFcJKXJgFVcILo-9TewdC67rTJ8=s576")}
-                    ${makeItemSmali(playlistIdSmali("PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI"), "Trending Music Videos", "Popular video hits", "https://yt3.googleusercontent.com/12Z2lesRDLk4t_Pd-lMs-TlvEJBFLIOv1Uh9mJUUneRqYVRRSjAkjcKkCNF7f3dejleGz77F7xN5=s576")}
-                    ${makeItemSmali(playlistIdSmali("PLrEnWoR732-BHrPp_Pm8_VleD68f9s14-"), "Popular Right Now", "Trending hit songs", "https://yt3.googleusercontent.com/i22CwRBnI9UZYAPf3Cuxcx0qCrzb_G5lzdIjYSiHtPNuIHPe8DQizfMmY6FX1-PI6sLMG1Sy9yY=s576")}
-                    ${makeItemSmali("""const-string v1, "MBS_ACTION_LIKE"""", "Like Current Song", "Thumbs up this track", "https://play-lh.googleusercontent.com/UvyJtlgvDLs2VIcOeg-aFDjB3XETm5Li0YZA6JaUOtUgcM_9ehzovpbLuof618tWfkIxW65vJcTFmFc6ak7uMw=w512-h512")}
-                    ${makeItemSmali("""const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Resume current track", "https://play-lh.googleusercontent.com/MyptZXmcCyF59phIWPsNCfHq6zSO_ojEdw_4rMYYWPOGdikSjqeOXcoszBZ053VYpINe5K7ZR9KV1nkFWgxdOw=w512-h512")}
+                    $itemsSmali
 
                     :cond_list_done
                     nop
