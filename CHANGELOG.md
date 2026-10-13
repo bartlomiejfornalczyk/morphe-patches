@@ -1,3 +1,9 @@
+## [1.1.0-dev.30](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.29...v1.1.0-dev.30) (2026-10-13)
+
+### ✨ New Features
+
+* **music:** replace playlist covers with official YouTube Music and Google icons ([595015f](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/595015f9e00396cf61ca4ad938cf026b182fb7b1))
+
 ## [1.1.0-dev.29](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.28...v1.1.0-dev.29) (2026-10-13)
 
 ### ✨ New Features
