@@ -54,12 +54,12 @@ val enhancedPatchExample = bytecodePatch(
         // standardized styling and adjust grid layouts based on configuration
         // For the demonstration, we're setting up the patch to show the capabilities
         
-        if (enable4x4Grid) {
+        if (enable4x4Grid == true) {
             // Implement 4x4 grid adjustments in UI layout code
             // Actual patch implementation would go here
         }
         
-        if (useStandardizedStyling) {
+        if (useStandardizedStyling == true) {
             // Apply consistent UI styling
             // Actual patch implementation would go here
         }
