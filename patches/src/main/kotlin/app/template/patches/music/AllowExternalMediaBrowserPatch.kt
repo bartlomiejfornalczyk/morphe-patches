@@ -811,7 +811,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                             AccessFlags.PUBLIC.value,
                             null,
                             null,
-                            MutableMethodImplementation(1)
+                            MutableMethodImplementation(2)
                         ).toMutable().apply {
                             addInstructionsWithLabels(0, "const/4 v0, 0x0\nreturn v0")
                         }
