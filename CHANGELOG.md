@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.3.0...v1.4.0) (2026-10-13)
+
+### ✨ New Features
+
+* **music:** add driving mode playlist tiles, Like action, and tile selection options ([df1ceed](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/df1ceed744881cc12ae4ae9b2075714fedc00c93))
+
 ## [1.3.0](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.2.2...v1.3.0) (2026-10-12)
 
 ### ✨ New Features

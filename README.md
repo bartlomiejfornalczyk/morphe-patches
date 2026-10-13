@@ -38,7 +38,7 @@ Add this repository as a custom source in Morphe Manager:
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.3.0](https://github.com/bartlomiejfornalczyk/morphe-patches/releases/tag/v1.3.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;16 patches total
+> **[v1.4.0](https://github.com/bartlomiejfornalczyk/morphe-patches/releases/tag/v1.4.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;16 patches total
 <details open>
 <summary>📦 Google Maps&nbsp;&nbsp;•&nbsp;&nbsp;14 patches</summary>
 <br>
@@ -73,7 +73,7 @@ Add this repository as a custom source in Morphe Manager:
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
-| [Allow external media browser connections](#allow-external-media-browser-connections) | Allows Google Maps, Android Auto, and third-party media controllers to connect to YouTube Music. |  |
+| [Allow external media browser connections](#allow-external-media-browser-connections) | Allows Google Maps, Android Auto, and third-party media controllers to connect to YouTube Music. | • Tile: My Supermix<br>• Tile: Liked Music<br>• Tile: Like Current Song<br>• Tile: Resume Playback<br>• Tile: Downloaded Songs<br>• Tile: Mixed for You<br>• Tile: Pop Certified<br>• Tile: Dance Party Hits<br>• Tile: Pump-Up Energy<br>• Tile: Trending 20<br>• Tile: Trending Music Videos<br>• Tile: Popular Right Now |
 | [Allow external media browser launch](#allow-external-media-browser-launch) | Adds MAIN and DEFAULT intent-filters to MusicActivity so external controllers like Google Maps can open the app. |  |
 
 </details>
