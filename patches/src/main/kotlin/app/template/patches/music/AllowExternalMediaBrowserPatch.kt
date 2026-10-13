@@ -2,6 +2,7 @@ package app.template.patches.music
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
@@ -12,6 +13,7 @@ import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
@@ -115,6 +117,79 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
         COMPATIBILITY_YOUTUBE_MUSIC
     )
     dependsOn(allowExternalMediaBrowserManifestPatch)
+
+    val tileSupermix by booleanOption(
+        key = "tileSupermix",
+        default = true,
+        title = "Tile: My Supermix",
+        description = "Personalized endless radio mix in external media browsers (Google Maps, Android Auto)."
+    )
+    val tileLikedMusic by booleanOption(
+        key = "tileLikedMusic",
+        default = true,
+        title = "Tile: Liked Music",
+        description = "Your favorite liked songs library in external media browsers."
+    )
+    val tileLikeCurrentSong by booleanOption(
+        key = "tileLikeCurrentSong",
+        default = true,
+        title = "Tile: Like Current Song",
+        description = "Quick thumbs-up action tile for the currently playing track in external media browsers."
+    )
+    val tileResumePlayback by booleanOption(
+        key = "tileResumePlayback",
+        default = true,
+        title = "Tile: Resume Playback",
+        description = "Quick resume / unpause action tile in external media browsers."
+    )
+    val tileDownloadedSongs by booleanOption(
+        key = "tileDownloadedSongs",
+        default = true,
+        title = "Tile: Downloaded Songs",
+        description = "Offline downloaded music library in external media browsers."
+    )
+    val tileMixedForYou by booleanOption(
+        key = "tileMixedForYou",
+        default = true,
+        title = "Tile: Mixed for You",
+        description = "Mixed for you road trip radio in external media browsers."
+    )
+    val tilePopCertified by booleanOption(
+        key = "tilePopCertified",
+        default = true,
+        title = "Tile: Pop Certified",
+        description = "Certified pop hits playlist in external media browsers."
+    )
+    val tileDancePartyHits by booleanOption(
+        key = "tileDancePartyHits",
+        default = true,
+        title = "Tile: Dance Party Hits",
+        description = "Upbeat dance & EDM anthems in external media browsers."
+    )
+    val tilePumpUpEnergy by booleanOption(
+        key = "tilePumpUpEnergy",
+        default = true,
+        title = "Tile: Pump-Up Energy",
+        description = "High energy workout & driving hits in external media browsers."
+    )
+    val tileTrending20 by booleanOption(
+        key = "tileTrending20",
+        default = false,
+        title = "Tile: Trending 20",
+        description = "Top 20 trending chart playlist in external media browsers."
+    )
+    val tileTrendingMusicVideos by booleanOption(
+        key = "tileTrendingMusicVideos",
+        default = false,
+        title = "Tile: Trending Music Videos",
+        description = "Top trending music videos playlist in external media browsers."
+    )
+    val tilePopularRightNow by booleanOption(
+        key = "tilePopularRightNow",
+        default = false,
+        title = "Tile: Popular Right Now",
+        description = "Popular hit songs playlist in external media browsers."
+    )
 
     execute {
         // 0. Bypass certificate checks (Google Maps, Android Auto partner certs & Google signed check)
@@ -414,22 +489,51 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                     """const-string v1, "${resolvePlaylistId(playlistId)}""""
                 }
 
-                fun makeItemSmali(mediaIdSmali: String, title: String, subtitle: String): String = """
-                    $mediaIdSmali
-                    new-instance v0, Landroid/support/v4/media/MediaDescriptionCompat;
-                    const-string v2, "$title"
-                    const-string v3, "$subtitle"
-                    const/4 v4, 0x0
-                    const/4 v5, 0x0
-                    const/4 v6, 0x0
-                    const/4 v7, 0x0
-                    const/4 v8, 0x0
-                    invoke-direct/range { v0 .. v8 }, Landroid/support/v4/media/MediaDescriptionCompat;-><init>(Ljava/lang/String;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/graphics/Bitmap;Landroid/net/Uri;Landroid/os/Bundle;Landroid/net/Uri;)V
-                    new-instance v1, Landroid/support/v4/media/MediaBrowserCompat${'$'}MediaItem;
-                    const/4 v2, 0x2
-                    invoke-direct { v1, v0, v2 }, Landroid/support/v4/media/MediaBrowserCompat${'$'}MediaItem;-><init>(Landroid/support/v4/media/MediaDescriptionCompat;I)V
-                    invoke-virtual { p1, v1 }, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
-                """.trimIndent()
+                fun makeItemSmali(mediaIdSmali: String, title: String, subtitle: String, iconUrl: String? = null): String {
+                    val iconSmali = if (iconUrl != null) {
+                        """
+                            const-string v6, "$iconUrl"
+                            invoke-static { v6 }, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
+                            move-result-object v6
+                        """.trimIndent()
+                    } else {
+                        "const/4 v6, 0x0"
+                    }
+
+                    return """
+                        $mediaIdSmali
+                        $iconSmali
+                        new-instance v0, Landroid/support/v4/media/MediaDescriptionCompat;
+                        const-string v2, "$title"
+                        const-string v3, "$subtitle"
+                        const/4 v4, 0x0
+                        const/4 v5, 0x0
+                        const/4 v7, 0x0
+                        const/4 v8, 0x0
+                        invoke-direct/range { v0 .. v8 }, Landroid/support/v4/media/MediaDescriptionCompat;-><init>(Ljava/lang/String;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/graphics/Bitmap;Landroid/net/Uri;Landroid/os/Bundle;Landroid/net/Uri;)V
+                        new-instance v1, Landroid/support/v4/media/MediaBrowserCompat${'$'}MediaItem;
+                        const/4 v2, 2
+                        invoke-direct { v1, v0, v2 }, Landroid/support/v4/media/MediaBrowserCompat${'$'}MediaItem;-><init>(Landroid/support/v4/media/MediaDescriptionCompat;I)V
+                        invoke-virtual { p1, v1 }, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+                    """.trimIndent()
+                }
+
+                val itemsSmali = buildString {
+                    if (tileSupermix == true) appendLine(makeItemSmali(playlistIdSmali("RDTM"), "My Supermix", "Personalized endless radio", "https://yt3.googleusercontent.com/a_Psx_TQyLsZ5S5ybBCtyK2ArHwLUN4p8LjmWL3wvtNc-xQaG447M3nKViimyjAsW3pQ2GdBO8L4Jj4=w544-h544-l90-rj"))
+                    if (tileLikedMusic == true) appendLine(makeItemSmali(playlistIdSmali("LM"), "Liked Music", "Your favorites", "https://play-lh.googleusercontent.com/JX8RAoUFybCYzCLp5bNhqeXCmhqqzXf4sX81-XsokkOJXqZyw5N83wpzrtHlILhFBkFmuhhM51z9wSLXQrEa=w512-h512"))
+                    if (tileLikeCurrentSong == true) appendLine(makeItemSmali("""const-string v1, "MBS_ACTION_LIKE"""", "Like Current Song", "Thumbs up this track", "https://play-lh.googleusercontent.com/UvyJtlgvDLs2VIcOeg-aFDjB3XETm5Li0YZA6JaUOtUgcM_9ehzovpbLuof618tWfkIxW65vJcTFmFc6ak7uMw=w512-h512"))
+                    if (tileResumePlayback == true) appendLine(makeItemSmali("""const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Resume current track", "https://play-lh.googleusercontent.com/MyptZXmcCyF59phIWPsNCfHq6zSO_ojEdw_4rMYYWPOGdikSjqeOXcoszBZ053VYpINe5K7ZR9KV1nkFWgxdOw=w512-h512"))
+                    if (tileDownloadedSongs == true) appendLine(makeItemSmali(playlistIdSmali("PPSV"), "Downloaded Songs", "Offline library", "https://play-lh.googleusercontent.com/cjyFg0ABFwOFdLf1GsCGRvOoAANqCnIsFCgwGe8g-FPVaQ5STxoqZAKQOph44Hlx-gO0GMx8AZC9AY1VUBiO=w512-h512"))
+                    if (tileMixedForYou == true) appendLine(makeItemSmali(playlistIdSmali("RDMM"), "Mixed for You", "Rock on the road hits", "https://yt3.googleusercontent.com/BSIKjtCY-sMw8NpepPWv7gGwk8ij7TvDH785SAdfEsQ6Zf1AVT1FKOYbSB3FlEAeeiKPwvfLNNkIktU=w544-h544-l90-rj"))
+                    if (tilePopCertified == true) appendLine(makeItemSmali(playlistIdSmali("RDCLAK5uy_lBNUteBRencHzKelu5iDHwLF6mYqjL-JU"), "Pop Certified", "Certified pop hits", "https://yt3.googleusercontent.com/H-a23V_iN1LA7Vi8r8H5grE9FmjUTIsy_WjzUO_5hYxNT4TRZNkBXSFKlNHLab3kKYpBlsqqhcCuhWE=w544-h544-l90-rj"))
+                    if (tileDancePartyHits == true) appendLine(makeItemSmali(playlistIdSmali("RDCLAK5uy_mkXiaMATud8GJQ3aX7f0nCeCqvehA9wTQ"), "Dance Party Hits", "Upbeat dance anthems", "https://yt3.googleusercontent.com/fcBazTj_SCl0s9rsgsI2x8d0UKr_vxHEuu35GYcua25DbjK4HpqV2ZxoykjwhdAVH34GJVq-5bEADJM=w544-h544-l90-rj"))
+                    if (tilePumpUpEnergy == true) appendLine(makeItemSmali(playlistIdSmali("RDCLAK5uy_mVJ3RRi_YBfUJnZnQxLAedQQcXHujbUcg"), "Pump-Up Energy", "High energy favorites", "https://yt3.googleusercontent.com/PiHeLTzGupMv0PkTI0dg-sstkzOx8yNkBOEfV67yP_sUkJtXLRk4JO8dwhz18rZAz9gHJSAGHeztsJ4=w544-h544-l90-rj"))
+                    if (tileTrending20 == true) appendLine(makeItemSmali(playlistIdSmali("PLFgquLnL59alW3xmYiWRaoz0oM3H17Lth"), "Trending 20", "Top charts right now", "https://yt3.googleusercontent.com/Fesjpk0-6-rFF02i0bnutv--ILcObw-4y8hhKqjBbfZteZkIEFcJKXJgFVcILo-9TewdC67rTJ8=s576"))
+                    if (tileTrendingMusicVideos == true) appendLine(makeItemSmali(playlistIdSmali("PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI"), "Trending Music Videos", "Popular video hits", "https://yt3.googleusercontent.com/12Z2lesRDLk4t_Pd-lMs-TlvEJBFLIOv1Uh9mJUUneRqYVRRSjAkjcKkCNF7f3dejleGz77F7xN5=s576"))
+                    if (tilePopularRightNow == true) appendLine(makeItemSmali(playlistIdSmali("PLrEnWoR732-BHrPp_Pm8_VleD68f9s14-"), "Popular Right Now", "Trending hit songs", "https://yt3.googleusercontent.com/i22CwRBnI9UZYAPf3Cuxcx0qCrzb_G5lzdIjYSiHtPNuIHPe8DQizfMmY6FX1-PI6sLMG1Sy9yY=s576"))
+                }.ifBlank {
+                    makeItemSmali(playlistIdSmali("RDTM"), "My Supermix", "Personalized endless radio", "https://yt3.googleusercontent.com/a_Psx_TQyLsZ5S5ybBCtyK2ArHwLUN4p8LjmWL3wvtNc-xQaG447M3nKViimyjAsW3pQ2GdBO8L4Jj4=w544-h544-l90-rj")
+                }
 
                 val fallbackSmali = """
                     if-nez p1, :cond_check_empty
@@ -444,17 +548,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                     new-instance p1, Ljava/util/ArrayList;
                     invoke-direct { p1 }, Ljava/util/ArrayList;-><init>()V
 
-                    ${makeItemSmali(playlistIdSmali("RDTM"), "My Supermix", "Personalized endless radio")}
-                    ${makeItemSmali(playlistIdSmali("LM"), "Liked Music", "Your favorites")}
-                    ${makeItemSmali(playlistIdSmali("PPSV"), "Downloaded Songs", "Offline library")}
-                    ${makeItemSmali(playlistIdSmali("RDMM"), "Mixed for You", "Popular hit songs")}
-                    ${makeItemSmali(playlistIdSmali("RDCLAK5uy_kmPRjHDECIcuVwnKsx2Ng7fyNgFKWNJFs"), "The Hit List", "Top hits right now")}
-                    ${makeItemSmali(playlistIdSmali("RDCLAK5uy_lBNUteBRencHzKelu5iDHwLF6mYqjL-JU"), "Pop Certified", "Certified pop hits")}
-                    ${makeItemSmali(playlistIdSmali("PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI"), "Trending Music Videos", "What is popular now")}
-                    ${makeItemSmali(playlistIdSmali("PLrEnWoR732-BHrPp_Pm8_VleD68f9s14-"), "Popular Now", "Trending songs")}
-                    ${makeItemSmali("""const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Resume current track")}
-                    ${makeItemSmali("""const-string v1, "MBS_ACTION_NEXT"""", "Next Track", "Skip to next song")}
-                    ${makeItemSmali("""const-string v1, "MBS_ACTION_PREV"""", "Previous Track", "Skip to previous song")}
+                    $itemsSmali
 
                     :cond_list_done
                     nop
@@ -498,6 +592,15 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                         m.implementation?.instructions?.any { insn ->
                             ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string == "onSkipToPrevious()"
                         } == true
+                }
+
+                val onSetRatingMethod = lagMutableClass.methods.firstOrNull { m ->
+                    m.parameterTypes == listOf("Landroid/support/v4/media/RatingCompat;") && m.returnType == "V"
+                }
+                val onCustomActionMethod = lagMutableClass.methods.firstOrNull { m ->
+                    m.parameterTypes == listOf("Ljava/lang/String;", "Landroid/os/Bundle;") &&
+                        m.returnType == "V" &&
+                        m.name != playFromMediaIdMethod.name
                 }
 
                 if (onPlayMethod != null && onSkipNextMethod != null && onSkipPrevMethod != null) {
@@ -547,6 +650,35 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                     }
 
                     val actionSmali = buildString {
+                        if (onSetRatingMethod != null) {
+                            appendLine("""
+                                const-string v0, "MBS_ACTION_LIKE"
+                                invoke-static { p1, v0 }, Landroid/text/TextUtils;->equals(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Z
+                                move-result v0
+                                if-eqz v0, :cond_check_play
+                                new-instance v0, Landroid/support/v4/media/RatingCompat;
+                                const/4 v1, 0x2
+                                const/high16 v2, 0x3f800000    # 1.0f
+                                invoke-direct { v0, v1, v2 }, Landroid/support/v4/media/RatingCompat;-><init>(IF)V
+                                invoke-virtual { p0, v0 }, ${lagClass.type}->${onSetRatingMethod.name}(Landroid/support/v4/media/RatingCompat;)V
+                                return-void
+
+                                :cond_check_play
+                            """.trimIndent())
+                        } else if (onCustomActionMethod != null) {
+                            appendLine("""
+                                const-string v0, "MBS_ACTION_LIKE"
+                                invoke-static { p1, v0 }, Landroid/text/TextUtils;->equals(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Z
+                                move-result v0
+                                if-eqz v0, :cond_check_play
+                                const-string v0, "thumbs_up_action"
+                                invoke-virtual { p0, v0, p2 }, ${lagClass.type}->${onCustomActionMethod.name}(Ljava/lang/String;Landroid/os/Bundle;)V
+                                return-void
+
+                                :cond_check_play
+                            """.trimIndent())
+                        }
+
                         appendLine("""
                             const-string v0, "MBS_ACTION_PLAY"
                             invoke-static { p1, v0 }, Landroid/text/TextUtils;->equals(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Z
@@ -745,6 +877,113 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                             val regSkip = (insns[j] as OneRegisterInstruction).registerA
                             lbgPlayMethod.replaceInstruction(j, "const/4 v$regSkip, 0x1")
                             break
+                        }
+                    }
+                }
+            }
+        }
+
+        // 9. Enable Like / Thumbs Up button in PlaybackStateCompat:
+        // YouTube Music natively supports liking songs from external controllers via CustomAction("thumbs_up_action")
+        // and PlaybackStateCompat.ACTION_SET_RATING (512), but suppresses both in external/driving mode.
+        // A. Patch h() on ThumbsUpAction (liv) to return true for thumbs_up_action,
+        // and suppress Waze action subclass (lkd).
+        val livClass = classDefByStrings("thumbs_up_action").firstOrNull { clazz ->
+            clazz.methods.any { m ->
+                m.returnType == "Ljava/lang/String;" &&
+                    m.parameterTypes.isEmpty() &&
+                    m.implementation?.instructions?.any { insn ->
+                        ((insn as? ReferenceInstruction)?.reference as? StringReference)?.string == "thumbs_up_action"
+                    } == true
+            }
+        }
+
+        if (livClass != null) {
+            val livMutableClass = mutableClassDefBy(livClass)
+            val hMethod = livMutableClass.methods.firstOrNull { m ->
+                m.returnType == "Z" && m.parameterTypes.isEmpty()
+            }
+
+            if (hMethod?.implementation != null) {
+                val count = hMethod.implementation!!.instructions.count()
+                if (count >= 2) {
+                    hMethod.replaceInstruction(0, "const/4 v0, 0x1")
+                    hMethod.replaceInstruction(1, "return v0")
+                    for (idx in 2 until count) {
+                        hMethod.replaceInstruction(idx, "nop")
+                    }
+                }
+
+                // If Waze action subclass (lkd) exists, suppress it by having its h() return false
+                val lkdClass = classDefByStrings("waze.thumbUp").firstOrNull { clazz ->
+                    clazz.superclass == livClass.type
+                }
+                if (lkdClass != null) {
+                    hMethod.accessFlags = hMethod.accessFlags and AccessFlags.FINAL.value.inv()
+                    val lkdMutableClass = mutableClassDefBy(lkdClass)
+                    lkdMutableClass.methods.add(
+                        ImmutableMethod(
+                            lkdMutableClass.type,
+                            hMethod.name,
+                            emptyList(),
+                            "Z",
+                            AccessFlags.PUBLIC.value,
+                            null,
+                            null,
+                            MutableMethodImplementation(2)
+                        ).toMutable().apply {
+                            addInstructionsWithLabels(0, "const/4 v0, 0x0\nreturn v0")
+                        }
+                    )
+                }
+            }
+        }
+
+        // B. In MediaSessionDrivingModeActions (kzr) & MediaSessionActions (ljg):
+        // Ensure ACTION_SET_RATING (512) is unconditionally added to PlaybackStateCompat actions bitmask,
+        // and ensure kzr.e() always returns the actions list containing thumbs_up_action (field k)
+        // rather than the driving list that omits it (field l).
+        val kzrClass = classDefByStrings("com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_PREVIOUS").firstOrNull()
+            ?: classDefByStrings("waze.state.isThumbUp").firstOrNull()
+
+        val ljgClass = classDefByStrings("MEDIA_BUTTON_PLACEMENT_SWAP_LIKE_FOR_SHUFFLE").firstOrNull()
+            ?: classDefByStrings("MEDIA_BUTTON_PLACEMENT_SEEK_FOCUSED_SWAP_SKIP").firstOrNull()
+
+        if (kzrClass != null) {
+            val kzrMutableClass = mutableClassDefBy(kzrClass)
+
+            // Force ACTION_SET_RATING (512 / 0x200) into actions in kzr.a(baxh, long):
+            val kzrAMethod = kzrMutableClass.methods.firstOrNull { m ->
+                m.parameterTypes.size == 2 &&
+                    m.parameterTypes[1] == "J" &&
+                    m.returnType == "J"
+            }
+            if (kzrAMethod?.implementation != null) {
+                kzrAMethod.addInstructionsWithLabels(0, """
+                    const-wide/16 v0, 0x200
+                    or-long/2addr p2, v0
+                """.trimIndent())
+            }
+
+            // In kzr.e(): ensure field k (containing thumbs_up_action) is returned instead of field l
+            if (ljgClass != null) {
+                val kzrEMethod = kzrMutableClass.methods.firstOrNull { m ->
+                    m.parameterTypes.isEmpty() && m.returnType == "Ljava/util/List;"
+                }
+                if (kzrEMethod?.implementation != null) {
+                    val eImpl = kzrEMethod.implementation!!
+                    val kField = ljgClass.fields.firstOrNull { it.name == "k" }
+                    val lField = ljgClass.fields.firstOrNull { it.name == "l" }
+
+                    if (kField != null && lField != null) {
+                        for (idx in 0 until eImpl.instructions.count()) {
+                            val insn = eImpl.instructions.elementAt(idx)
+                            val ref = (insn as? ReferenceInstruction)?.reference as? FieldReference ?: continue
+                            if (ref.definingClass == ljgClass.type && ref.name == lField.name) {
+                                val regA = (insn as TwoRegisterInstruction).registerA
+                                val regB = insn.registerB
+                                kzrEMethod.replaceInstruction(idx, "iget-object v$regA, v$regB, ${ljgClass.type}->${kField.name}:${kField.type}")
+                            }
                         }
                     }
                 }
