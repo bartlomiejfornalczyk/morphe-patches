@@ -26,7 +26,6 @@ import org.w3c.dom.Element
  * A standard implementation of UI components designed to improve patch appearance
  * and establish a consistent visual language across all Morphe patches.
  */
-@Suppress("unused")
 val standardizedUIPatch = bytecodePatch(
     name = "Standardize patch UI appearance",
     description = "Improve the visual appearance and consistency of patch UI elements.",
@@ -44,7 +43,6 @@ val standardizedUIPatch = bytecodePatch(
  * Enables configuration of grid layouts for YouTube Music UI components.
  * Adds support for 3x3 and 4x4 grid sizes in patch UI elements.
  */
-@Suppress("unused")
 val gridConfigurationPatch = bytecodePatch(
     name = "Grid configuration",
     description = "Configure UI grid layouts (3x3 or 4x4).",

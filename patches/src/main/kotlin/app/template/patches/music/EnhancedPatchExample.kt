@@ -26,7 +26,6 @@ import org.w3c.dom.Element
  * Example demonstration patch that shows how to implement standard UI appearance
  * with grid configurations and 4x4 layout support.
  */
-@Suppress("unused")
 val enhancedPatchExample = bytecodePatch(
     name = "Enhanced UI with grid support",
     description = "Example patch demonstrating standardized UI appearances and 4x4 grid implementation.",

@@ -26,7 +26,6 @@ import org.w3c.dom.Element
  * Enhanced grid system for YouTube Music patches with support for both 3x3 and 4x4 layouts.
  * This patch provides standardized UI presentation and grid configuration options.
  */
-@Suppress("unused")
 val enhancedGridPatch = bytecodePatch(
     name = "Enhanced grid layout",
     description = "Standardize UI appearance and enable 4x4 grid layouts for patch elements.",
