@@ -1,3 +1,9 @@
+## [1.1.0-dev.28](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.27...v1.1.0-dev.28) (2026-10-13)
+
+### 🐛 Bug Fixes
+
+* **music:** set register count to 2 for Waze action override ([8d42d5f](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/8d42d5f5e3430a5880fe40ffeeebd1e58d14d7cd))
+
 ## [1.1.0-dev.27](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.1.0-dev.26...v1.1.0-dev.27) (2026-10-12)
 
 ### ✨ New Features
