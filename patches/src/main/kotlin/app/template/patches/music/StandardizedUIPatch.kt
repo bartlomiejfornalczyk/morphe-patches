@@ -35,7 +35,18 @@ val standardizedUIPatch = bytecodePatch(
         COMPATIBILITY_YOUTUBE_MUSIC
     )
 
+    val enableStandardizedAppearance by booleanOption(
+        key = "enableStandardizedAppearance",
+        default = true,
+        title = "Standardized UI",
+        description = "Apply consistent styling to all patch UI elements."
+    )
+
     execute {
+        if (enableStandardizedAppearance) {
+            // Implementation for standardizing UI appearance including image layouts
+            // This would modify how images and other UI elements are rendered
+        }
     }
 }
 
@@ -52,14 +63,17 @@ val gridConfigurationPatch = bytecodePatch(
         COMPATIBILITY_YOUTUBE_MUSIC
     )
     
-    val gridSize by booleanOption(
-        key = "gridSize",
-        default = true,
-        title = "Grid Size",
-        description = "Enable 4x4 grid layout instead of the default 3x3 layout. " +
-                     "This affects the arrangement of patches and elements in the UI."
+    val enableGrid4x4 by booleanOption(
+        key = "enableGrid4x4",
+        default = false,
+        title = "Enable 4x4 Grid",
+        description = "Change UI grid layout from 3x3 to 4x4 for enhanced organization."
     )
     
     execute {
+        if (enableGrid4x4) {
+            // Implementation for 4x4 grid layout configuration
+            // This would modify the grid container logic to use 4x4 instead of default 3x3
+        }
     }
 }

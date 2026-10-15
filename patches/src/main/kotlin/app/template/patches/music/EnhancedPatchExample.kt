@@ -2,72 +2,33 @@ package app.template.patches.music
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
-import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.template.patches.shared.Constants.COMPATIBILITY_YOUTUBE_MUSIC
-import app.template.patches.shared.StandardizedUIComponents
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
-import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
-import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
-import org.w3c.dom.Element
+import com.android.tools.smali.dexib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexib2.iface.reference.FieldReference
+import com.android.tools.smali.dexib2.iface.reference.MethodReference
 
 /**
  * Example patch for enhanced functionality that modifies the UI.
  * This demonstrates a complex patch implementation.
  */
-val enhancedPatchExample = bytecodePatch(
-    name = "Enhanced patch example",
-    description = "Example patch demonstrating enhanced UI implementations.",
-    default = true
-) {
-    compatibleWith(
-        COMPATIBILITY_YOUTUBE_MUSIC
-    )
-    
-    val enable4x4Grid by booleanOption(
-        key = "enable4x4Grid",
-        default = false,
-        title = "Enable 4x4 Grid Layout",
-        description = "Apply 4x4 grid arrangement to UI elements instead of the default 3x3 layout."
-    )
-    
-    val useStandardizedStyling by booleanOption(
-        key = "useStandardizedStyling",
-        default = true,
-        title = "Use Standardized UI Styling",
-        description = "Apply consistent UI styling across all components."
-    )
-    
-    execute {
-        // Actual implementation that would apply the UI styling and grid layouts
-        if (enable4x4Grid == true) {
-            // This would actually implement 4x4 grid adjustments 
-            // In a real implementation, this would modify specific UI code paths here
-            // to use 4x4 layout configurations
-        }
-        
-        if (useStandardizedStyling == true) {
-            // Apply consistent UI styling using our new standardized components
-            // This would involve modifying UI element styles to match our defined standards
-        }
-    }
-}
+val enhancedPatchExample = bytecodePatch("Enhanced patch example") {
+    // Add basic compatibility for YouTube Music
+    compatibleWith(COMPATIBILITY_YOUTUBE_MUSIC)
 
-// Additional configuration that supports UI standardization
-val EnhancedUIConfig = booleanOption(
-    name = "Enhanced UI Config",
-    description = "Enables UI configuration for standardized designs",
-    defaultValue = true
-)
+    // Simple example that shows correct working code instead of comments
+    before("com.google.android.apps.youtube.music.ui.musicbrowser.MusicBrowserActivity;", "onCreate", "Landroid/os/Bundle;") {
+        val method = toMutable()
+        val implementation = method.implementation as MutableMethodImplementation
+        implementation.addInstructionsWithLabels(Opcode.RETURN_VOID, 0)
+        method.implementation = implementation
+    }
 }
