@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.4.0",
+  "version": "1.5.0-dev.1",
   "patches": [
     {
       "name": "Add microG support",
@@ -130,6 +130,15 @@
       ],
       "options": [
         {
+          "key": "enable4x4Grid",
+          "title": "Enable 4x4 grid layout (16 tiles)",
+          "description": "Increases the media browser tile grid layout from the default 3x3 (9 tiles) to 4x4 (16 tiles).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
           "key": "tileSupermix",
           "title": "Tile: My Supermix",
           "description": "Personalized endless radio mix in external media browsers (Google Maps, Android Auto).",
@@ -232,6 +241,42 @@
           "key": "tilePopularRightNow",
           "title": "Tile: Popular Right Now",
           "description": "Popular hit songs playlist in external media browsers.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "tileChillHits",
+          "title": "Tile: Chill Hits",
+          "description": "Relaxing acoustic & chill pop hits playlist in external media browsers.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "tileWorkoutBeats",
+          "title": "Tile: Workout Beats",
+          "description": "High-tempo workout & driving beats in external media browsers.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "tileRockClassics",
+          "title": "Tile: Rock Classics",
+          "description": "Timeless rock anthems playlist in external media browsers.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "tileFocusFlow",
+          "title": "Tile: Focus Flow",
+          "description": "Instrumental & lo-fi focus beats in external media browsers.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
