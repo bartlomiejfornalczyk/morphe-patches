@@ -92,5 +92,23 @@ fun playlistPlaybackCommandFingerprint(commandType: String) = Fingerprint(
     )
 )
 
+/**
+ * Matches BrowserRootExtrasBuilder (lin) in YouTube Music.
+ * Builds the root hints and content style extras bundle returned by MusicBrowserService.onGetRoot.
+ */
+object BrowserRootExtrasFingerprint : Fingerprint(
+    returnType = "Landroid/os/Bundle;",
+    strings = listOf("androidx.media.BrowserRoot.Extras.APPLICATION_PREFERENCES_USING_CAR_APP_LIBRARY_INTENT")
+)
 
+/**
+ * Matches MediaItemFactory (lgk) in YouTube Music.
+ * Responsible for constructing MediaBrowserCompat.MediaItem descriptors and CONTENT_STYLE hints.
+ */
+object MediaItemFactoryFingerprint : Fingerprint(
+    strings = listOf(
+        "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT",
+        "Must specify a container type"
+    )
+)
 
