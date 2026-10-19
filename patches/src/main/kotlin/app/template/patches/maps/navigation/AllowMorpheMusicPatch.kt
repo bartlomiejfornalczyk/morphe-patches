@@ -7,10 +7,13 @@ import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringOption
 import app.template.patches.shared.Constants.COMPATIBILITY_GOOGLE_MAPS
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import org.w3c.dom.Element
 
 val allowMorpheMusicManifestPatch = resourcePatch(
@@ -167,39 +170,70 @@ val allowMorpheMusicPatch = bytecodePatch(
                 }
 
                 // B. In a() (layout builder), change GridLayoutManager column count from 3 to 4:
+                // In bytecode, ayyl.aR(3) and ayyl.aR(4) are compiled as consecutive INVOKE_STATIC_RANGE / INVOKE_STATIC
+                // calls to the same Layyl;->aR(I)Lbgwy; method:
+                //   [311] invoke-static/range {v21 .. v21}, Layyl;->aR(I)Lbgwy;
+                //   [312] move-result-object v12
+                //   [313] invoke-static/range {v23 .. v23}, Layyl;->aR(I)Lbgwy;
+                //   [314] move-result-object v13
+                // Replacing [311] with the exact same 4-column invocation as [313] switches the grid to 4 columns.
                 val layoutMethod = amoyMutable.methods.firstOrNull { m ->
                     m.parameterTypes.isEmpty() && m.returnType.startsWith("L") && m.name != "<init>"
                 }
                 if (layoutMethod?.implementation != null) {
                     val insns = layoutMethod.implementation!!.instructions.toList()
-                    // Identify the GridLayoutManager factory method (ayyl.aR(I)) which is called with 4:
-                    val gridFactoryMethods = mutableSetOf<String>()
-                    for (idx in 0 until insns.size - 1) {
-                        val insn = insns[idx]
-                        val next = insns[idx + 1]
-                        if (insn.opcode == Opcode.CONST_4 &&
-                            (insn as? NarrowLiteralInstruction)?.narrowLiteral == 4 &&
-                            next.opcode == Opcode.INVOKE_STATIC
+                    for (idx in 0 until insns.size - 2) {
+                        val insn1 = insns[idx]
+                        val insnMid = insns[idx + 1]
+                        val insn2 = insns[idx + 2]
+                        if ((insn1.opcode == Opcode.INVOKE_STATIC || insn1.opcode == Opcode.INVOKE_STATIC_RANGE) &&
+                            insnMid.opcode == Opcode.MOVE_RESULT_OBJECT &&
+                            (insn2.opcode == Opcode.INVOKE_STATIC || insn2.opcode == Opcode.INVOKE_STATIC_RANGE)
                         ) {
-                            val ref = (next as? ReferenceInstruction)?.reference as? MethodReference
-                            if (ref != null && ref.parameterTypes == listOf("I")) {
-                                gridFactoryMethods.add("${ref.definingClass}->${ref.name}")
+                            val ref1 = (insn1 as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                            val ref2 = (insn2 as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                            if (ref1.definingClass == ref2.definingClass &&
+                                ref1.name == ref2.name &&
+                                ref2.parameterTypes == listOf("I")
+                            ) {
+                                if (insn2 is RegisterRangeInstruction) {
+                                    val reg4 = insn2.startRegister
+                                    layoutMethod.replaceInstruction(
+                                        idx,
+                                        "invoke-static/range { v$reg4 .. v$reg4 }, ${ref2.definingClass}->${ref2.name}(I)${ref2.returnType}"
+                                    )
+                                } else if (insn2 is FiveRegisterInstruction) {
+                                    val reg4 = insn2.registerC
+                                    layoutMethod.replaceInstruction(
+                                        idx,
+                                        "invoke-static { v$reg4 }, ${ref2.definingClass}->${ref2.name}(I)${ref2.returnType}"
+                                    )
+                                }
                             }
                         }
                     }
+                }
 
-                    // Replace the preceding 3-column call (ayyl.aR(3)) with 4 columns (ayyl.aR(4)):
-                    for (idx in 0 until insns.size - 1) {
-                        val insn = insns[idx]
-                        val next = insns[idx + 1]
-                        if (insn.opcode == Opcode.CONST_4 &&
-                            (insn as? NarrowLiteralInstruction)?.narrowLiteral == 3 &&
-                            next.opcode == Opcode.INVOKE_STATIC
-                        ) {
-                            val ref = (next as? ReferenceInstruction)?.reference as? MethodReference
-                            if (ref != null && "${ref.definingClass}->${ref.name}" in gridFactoryMethods) {
+                // C. Also compact the tile item row vertical margin in amow (from 24dp to 12dp) so 4 rows fit cleanly:
+                val okMethod = amoyMutable.methods.firstOrNull { m ->
+                    m.parameterTypes.size == 4 && m.returnType == "V"
+                }
+                val amowType = okMethod?.implementation?.instructions
+                    ?.filter { it.opcode == Opcode.NEW_INSTANCE }
+                    ?.mapNotNull { ((it as? ReferenceInstruction)?.reference as? TypeReference)?.type }
+                    ?.lastOrNull()
+                if (amowType != null) {
+                    val amowMutable = mutableClassDefByOrNull(amowType)
+                    val amowLayoutMethod = amowMutable?.methods?.firstOrNull { m ->
+                        m.parameterTypes.isEmpty() && m.returnType.startsWith("L") && m.name != "<init>"
+                    }
+                    if (amowLayoutMethod?.implementation != null) {
+                        val insns = amowLayoutMethod.implementation!!.instructions.toList()
+                        for (idx in insns.indices) {
+                            val insn = insns[idx]
+                            if (insn.opcode == Opcode.CONST_16 && (insn as? NarrowLiteralInstruction)?.narrowLiteral == 24) {
                                 val reg = (insn as OneRegisterInstruction).registerA
-                                layoutMethod.replaceInstruction(idx, "const/4 v$reg, 0x4")
+                                amowLayoutMethod.replaceInstruction(idx, "const/16 v$reg, 0xc")
                             }
                         }
                     }

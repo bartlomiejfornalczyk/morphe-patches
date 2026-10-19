@@ -1,8 +1,8 @@
 package app.template.patches.maps.navigation
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.literal
 import app.morphe.patcher.string
-import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 
 /**
  * Fingerprint matching the navigation media provider resolution method (xzt.ux()).
@@ -35,12 +35,12 @@ object MediaBrowserBrowseSheetFingerprint : Fingerprint(
     name = "<clinit>",
     returnType = "V",
     parameters = emptyList(),
-    custom = { method, _ ->
-        val literals = method.implementation?.instructions
-            ?.filterIsInstance<NarrowLiteralInstruction>()
-            ?.map { it.narrowLiteral }
-            ?.toSet() ?: emptySet()
-        literals.contains(167) && literals.contains(333) && literals.contains(500) && literals.contains(80)
-    }
+    filters = listOf(
+        literal(80L),
+        literal(167L),
+        literal(333L),
+        literal(500L)
+    )
 )
+
 
