@@ -112,3 +112,15 @@ object MediaItemFactoryFingerprint : Fingerprint(
     )
 )
 
+/**
+ * Matches MusicCarouselShelfPresenter (qlg) in YouTube Music.
+ * Controls the multi-row Quick Picks / Speed Dial grid layout (default 3 rows).
+ */
+object MusicCarouselShelfFingerprint : Fingerprint(
+    strings = listOf("pagePadding"),
+    custom = { _, classDef ->
+        classDef.fields.any { it.type == "Lcom/google/android/apps/youtube/music/ui/presenter/MusicSnappyRecyclerView;" }
+    }
+)
+
+

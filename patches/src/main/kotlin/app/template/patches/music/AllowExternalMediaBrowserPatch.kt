@@ -120,7 +120,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
 
     val enable4x4Grid by booleanOption(
         key = "enable4x4Grid",
-        default = false,
+        default = true,
         title = "Enable 4x4 grid layout (16 tiles)",
         description = "Increases the media browser tile grid layout from the default 3x3 (9 tiles) to 4x4 (16 tiles)."
     )
@@ -539,6 +539,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                         const-string v3, "$subtitle"
                         const/4 v4, 0x0
                         const/4 v5, 0x0
+                        const/4 v7, 0x0
                         const/4 v8, 0x0
                         invoke-direct/range { v0 .. v8 }, Landroid/support/v4/media/MediaDescriptionCompat;-><init>(Ljava/lang/String;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/graphics/Bitmap;Landroid/net/Uri;Landroid/os/Bundle;Landroid/net/Uri;)V
                         new-instance v1, Landroid/support/v4/media/MediaBrowserCompat${'$'}MediaItem;
@@ -559,10 +560,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                 }
 
                 addTileIfEnabled(tileSupermix == true, playlistIdSmali("RDTM"), "My Supermix", "Personalized endless radio", "https://yt3.googleusercontent.com/a_Psx_TQyLsZ5S5ybBCtyK2ArHwLUN4p8LjmWL3wvtNc-xQaG447M3nKViimyjAsW3pQ2GdBO8L4Jj4=w512-h512-l90-rj")
-                addTileIfEnabled(tileLikedMusic == true, playlistIdSmali("LM"), "Liked Music", "Your favorites", "https://yt3.googleusercontent.com/V4m9wB6J_4lG5uJc7p-H9K2Z3xQ1yW8vR0tN5mP2cD7bA9sE4fG6hJ8kL1qW3eR5tY7uI9oP0aS=w512-h512-l90-rj")
-                addTileIfEnabled(tileLikeCurrentSong == true, """const-string v1, "MBS_ACTION_LIKE"""", "Like Current Song", "Thumbs up this track", "https://yt3.googleusercontent.com/Q8kL2mN4pB6vC8xZ0aS2dF4gH6jK8lP1oI3uY5tR7eW9qA2sD4fG6hJ8kL0zX2cV4bN6mM8pQ1w=w512-h512-l90-rj")
-                addTileIfEnabled(tileResumePlayback == true, """const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Resume current track", "https://yt3.googleusercontent.com/M2nB4vC6xZ8aS0dF2gH4jK6lP8oI1uY3tR5eW7qA9sD2fG4hJ6kL8zX0cV2bN4mM6pQ8wE1rT3y=w512-h512-l90-rj")
-                addTileIfEnabled(tileDownloadedSongs == true, playlistIdSmali("PPSV"), "Downloaded Songs", "Offline library", "https://yt3.googleusercontent.com/D4fG6hJ8kL0zX2cV4bN6mM8pQ1wE3rT5yU7iO9pA2sD4fG6hJ8kL0zX2cV4bN6mM8pQ1wE3rT5y=w512-h512-l90-rj")
+                addTileIfEnabled(tileLikedMusic == true, playlistIdSmali("LM"), "Liked Music", "Your favorites", "https://play-lh.googleusercontent.com/5kFm2Or1bHsU_OEZWkrWPWTBol5V5lMYbZieFg8E_8iXjuarqkb6PEQnKW84nD6KPGvLySi_XZfY90dA0aFL=w512-h512")
+                addTileIfEnabled(tileLikeCurrentSong == true, """const-string v1, "MBS_ACTION_LIKE"""", "Like Current Song", "Thumbs up this track", "https://play-lh.googleusercontent.com/iUcHO24Cm42Dh6Zx_tsr4YyrHfUWQKAasH_TK1IIdxCBewFZs617i9EJ7drCGfSCssHdsA86up_tAC0KGU1ArQ=w512-h512")
+                addTileIfEnabled(tileResumePlayback == true, """const-string v1, "MBS_ACTION_PLAY"""", "Resume Playback", "Resume current track", "https://play-lh.googleusercontent.com/-21ASw97RWIu-CnDVbEEtTrfVIDqpfhY4eofgk5aT98q4E8jnrMVxNqI0J7JYgRTkHjoOoWM58ScUzu30cxevQ=w512-h512")
+                addTileIfEnabled(tileDownloadedSongs == true, playlistIdSmali("PPSV"), "Downloaded Songs", "Offline library", "https://play-lh.googleusercontent.com/VeguMIv6xJTJA4Plh9YUR0py6GMxe6lZUzQE-yWvN7PZzBeEU-xXenNib8umyZUzKVRmj9gvUFi5Gev79PAkD7g=w512-h512")
                 addTileIfEnabled(tileMixedForYou == true, playlistIdSmali("RDMM"), "Mixed for You", "Rock on the road hits", "https://yt3.googleusercontent.com/BSIKjtCY-sMw8NpepPWv7gGwk8ij7TvDH785SAdfEsQ6Zf1AVT1FKOYbSB3FlEAeeiKPwvfLNNkIktU=w512-h512-l90-rj")
                 addTileIfEnabled(tilePopCertified == true, playlistIdSmali("RDCLAK5uy_lBNUteBRencHzKelu5iDHwLF6mYqjL-JU"), "Pop Certified", "Certified pop hits", "https://yt3.googleusercontent.com/H-a23V_iN1LA7Vi8r8H5grE9FmjUTIsy_WjzUO_5hYxNT4TRZNkBXSFKlNHLab3kKYpBlsqqhcCuhWE=w512-h512-l90-rj")
                 addTileIfEnabled(tileDancePartyHits == true, playlistIdSmali("RDCLAK5uy_mkXiaMATud8GJQ3aX7f0nCeCqvehA9wTQ"), "Dance Party Hits", "Upbeat dance anthems", "https://yt3.googleusercontent.com/fcBazTj_SCl0s9rsgsI2x8d0UKr_vxHEuu35GYcua25DbjK4HpqV2ZxoykjwhdAVH34GJVq-5bEADJM=w512-h512-l90-rj")
@@ -570,10 +571,10 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                 addTileIfEnabled(tileTrending20 == true || is4x4, playlistIdSmali("PLFgquLnL59alW3xmYiWRaoz0oM3H17Lth"), "Trending 20", "Top charts right now", "https://yt3.googleusercontent.com/Fesjpk0-6-rFF02i0bnutv--ILcObw-4y8hhKqjBbfZteZkIEFcJKXJgFVcILo-9TewdC67rTJ8=w512-h512-l90-rj")
                 addTileIfEnabled(tileTrendingMusicVideos == true || is4x4, playlistIdSmali("PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI"), "Trending Music Videos", "Popular video hits", "https://yt3.googleusercontent.com/12Z2lesRDLk4t_Pd-lMs-TlvEJBFLIOv1Uh9mJUUneRqYVRRSjAkjcKkCNF7f3dejleGz77F7xN5=w512-h512-l90-rj")
                 addTileIfEnabled(tilePopularRightNow == true || is4x4, playlistIdSmali("PLrEnWoR732-BHrPp_Pm8_VleD68f9s14-"), "Popular Right Now", "Trending hit songs", "https://yt3.googleusercontent.com/i22CwRBnI9UZYAPf3Cuxcx0qCrzb_G5lzdIjYSiHtPNuIHPe8DQizfMmY6FX1-PI6sLMG1Sy9yY=w512-h512-l90-rj")
-                addTileIfEnabled(tileChillHits == true || is4x4, playlistIdSmali("RDCLAK5uy_n9Fbdw7e6ap-98_A-8JYBmPv64v-Uaq1g"), "Chill Hits", "Relaxing chill pop hits", "https://yt3.googleusercontent.com/C7vX9zB1nM3qW5eR7tY9uI1oP3aS5dF7gH9jK1lZ3xC5vB7nM9qW1eR3tY5uI7oP9aS1dF3gH5j=w512-h512-l90-rj")
-                addTileIfEnabled(tileWorkoutBeats == true || is4x4, playlistIdSmali("RDCLAK5uy_k5n4s3_4L1k2_a2P-6T4nC2t2x4y0z8Q0"), "Workout Beats", "High-tempo workout beats", "https://yt3.googleusercontent.com/W2eR4tY6uI8oP0aS2dF4gH6jK8lZ0xC2vB4nM6qW8eR0tY2uI4oP6aS8dF0gH2jK4lZ6xC8vB0n=w512-h512-l90-rj")
-                addTileIfEnabled(tileRockClassics == true || is4x4, playlistIdSmali("RDCLAK5uy_k6Pk2c10r1mIqN_nL2G3_z4_Y5_X6_W7"), "Rock Classics", "Timeless rock anthems", "https://yt3.googleusercontent.com/R4tY6uI8oP0aS2dF4gH6jK8lZ0xC2vB4nM6qW8eR0tY2uI4oP6aS8dF0gH2jK4lZ6xC8vB0nM2q=w512-h512-l90-rj")
-                addTileIfEnabled(tileFocusFlow == true || is4x4, playlistIdSmali("RDCLAK5uy_l2x8G-p9_q0_r1_s2_t3_u4_v5_w6_x7"), "Focus Flow", "Instrumental focus beats", "https://yt3.googleusercontent.com/F6gH8jK0lZ2xC4vB6nM8qW0eR2tY4uI6oP8aS0dF2gH4jK6lZ8xC0vB2nM4qW6eR8tY0uI2oP4a=w512-h512-l90-rj")
+                addTileIfEnabled(tileChillHits == true || is4x4, playlistIdSmali("RDCLAK5uy_lmztFiBPwa16-qz6nwMaNrtVFPzCYNOkA"), "Chill Hits", "Relaxing chill pop hits", "https://yt3.googleusercontent.com/X5tJkYgbX9x6s7Qq4mPU5ExTv2qEnIprOE4zSvIdO5ZyyoOrnXNorz3Ru46DRwSuE7C6MeCYKJ-b5b8=w512-h512-l90-rj")
+                addTileIfEnabled(tileWorkoutBeats == true || is4x4, playlistIdSmali("RDCLAK5uy_mcd5hbKGTuwPRREfC4-0foufnfjx90hrg"), "Workout Beats", "High-tempo workout beats", "https://yt3.googleusercontent.com/Pziz93XNacNJJP6S-Vu0fRmT1eN1wDJ3LZJ1mpXZMFvw2TCfWFPjhdmB7eCVy0qJLmwgPKtoTDV7cWZY=w512-h512-l90-rj")
+                addTileIfEnabled(tileRockClassics == true || is4x4, playlistIdSmali("RDCLAK5uy_klY80tDUG8t6V0eXb5ttfGqRZZb8c5JZg"), "Rock Classics", "Timeless rock anthems", "https://yt3.googleusercontent.com/Qqf9vxdGTASDhYpp5o2TVIVoOogYXoSpGTtLovQyfcxC19sSGAnsLtuo9lcJKQGR1gJGRq0to2BuiA=w512-h512-l90-rj")
+                addTileIfEnabled(tileFocusFlow == true || is4x4, playlistIdSmali("RDCLAK5uy_n9hGvSNdO2TpX8jJuiThvnfrfIi1qNRnY"), "Focus Flow", "Instrumental focus beats", "https://yt3.googleusercontent.com/Jx8ayDHUoBH0ZDj87d2Jibuvd0nXxeVf3RAbYUAf3f2o3Sr9vWkMVVGfgMLjjAuFBXcp7Wl-JW3pVzw=w512-h512-l90-rj")
 
                 val itemsSmali = selectedTileBlocks.joinToString("\n").ifBlank {
                     makeItemSmali(playlistIdSmali("RDTM"), "My Supermix", "Personalized endless radio", "https://yt3.googleusercontent.com/a_Psx_TQyLsZ5S5ybBCtyK2ArHwLUN4p8LjmWL3wvtNc-xQaG447M3nKViimyjAsW3pQ2GdBO8L4Jj4=w512-h512-l90-rj")
@@ -591,13 +592,6 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                     :cond_create_fallback
                     new-instance p1, Ljava/util/ArrayList;
                     invoke-direct { p1 }, Ljava/util/ArrayList;-><init>()V
-                    new-instance v7, Landroid/os/Bundle;
-                    invoke-direct { v7 }, Landroid/os/Bundle;-><init>()V
-                    const-string v0, "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT"
-                    const/4 v1, 0x2
-                    invoke-virtual { v7, v0, v1 }, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
-                    const-string v0, "android.media.browse.CONTENT_STYLE_BROWSABLE_HINT"
-                    invoke-virtual { v7, v0, v1 }, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
 
                     $itemsSmali
 
@@ -1041,7 +1035,7 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
             }
         }
 
-        // 10. Configure BrowserRoot extras (lin.a) and MediaItemFactory (lgk.b) for 3x3 / 4x4 grid layout:
+        // 10. Configure 4x4 grid layout in YouTube Music (BrowserRoot extras, MediaItemFactory, and CarouselShelf 3x3 -> 4x4):
         val linClass = BrowserRootExtrasFingerprint.classDefOrNull
             ?: classDefByStrings("androidx.media.BrowserRoot.Extras.APPLICATION_PREFERENCES_USING_CAR_APP_LIBRARY_INTENT").firstOrNull()
         if (linClass != null) {
@@ -1066,8 +1060,6 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                             invoke-virtual { p0, v0, v1 }, Landroid/os/Bundle;->putBoolean(Ljava/lang/String;Z)V
                             const-string v0, "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT"
                             const/4 v1, 0x2
-                            invoke-virtual { p0, v0, v1 }, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
-                            const-string v0, "android.media.browse.CONTENT_STYLE_BROWSABLE_HINT"
                             invoke-virtual { p0, v0, v1 }, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
                             const-string v0, "com.google.android.apps.youtube.music.mediabrowser.MAX_TILES"
                             const/16 v1, $maxGridTiles
@@ -1110,14 +1102,77 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
                 val insns = lgkBMethod.implementation!!.instructions.toList()
                 for (idx in insns.indices) {
                     val str = ((insns[idx] as? ReferenceInstruction)?.reference as? StringReference)?.string
-                    if (str == "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT" ||
-                        str == "android.media.browse.CONTENT_STYLE_BROWSABLE_HINT"
-                    ) {
+                    if (str == "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT") {
                         if (idx + 1 < insns.size && insns[idx + 1].opcode == Opcode.CONST_4) {
                             val reg = (insns[idx + 1] as OneRegisterInstruction).registerA
                             lgkBMethod.replaceInstruction(idx + 1, "const/4 v$reg, 0x2")
                         }
                     }
+                }
+            }
+        }
+
+        if (enable4x4Grid == true) {
+            // Upgrade YouTube Music's 3-row x 3-column grid (qlg.e & qpa.b) to 4x4:
+            val qlgClass = MusicCarouselShelfFingerprint.classDefOrNull
+            if (qlgClass != null) {
+                val qlgMutableClass = mutableClassDefBy(qlgClass)
+                val eMethod = qlgMutableClass.methods.firstOrNull { m ->
+                    (m.accessFlags and AccessFlags.STATIC.value != 0) &&
+                        m.parameterTypes.size == 1 &&
+                        m.returnType == "I"
+                }
+                if (eMethod?.implementation != null) {
+                    val insns = eMethod.implementation!!.instructions.toList()
+                    val retIdx = insns.indexOfLast { it.opcode == Opcode.RETURN }
+                    if (retIdx != -1) {
+                        val retReg = (insns[retIdx] as OneRegisterInstruction).registerA
+                        val tempReg = if (retReg == 0) 1 else 0
+                        eMethod.addInstructionsWithLabels(
+                            retIdx,
+                            """
+                                const/4 v$tempReg, 0x3
+                                if-ne v$retReg, v$tempReg, :cond_keep_rows
+                                const/4 v$retReg, 0x4
+                                :cond_keep_rows
+                                nop
+                            """.trimIndent()
+                        )
+                    }
+                }
+            }
+
+            val qpaClass = classDefByStrings("carouselItemWidth").firstOrNull { clazz ->
+                clazz.methods.any { m ->
+                    (m.accessFlags and AccessFlags.STATIC.value != 0) &&
+                        m.parameterTypes.size == 4 &&
+                        m.parameterTypes[0] == "Landroid/content/Context;" &&
+                        m.parameterTypes[1] == "I" &&
+                        m.parameterTypes[2] == "I" &&
+                        m.returnType == "I"
+                }
+            }
+            if (qpaClass != null) {
+                val qpaMutableClass = mutableClassDefBy(qpaClass)
+                val bMethod = qpaMutableClass.methods.firstOrNull { m ->
+                    (m.accessFlags and AccessFlags.STATIC.value != 0) &&
+                        m.parameterTypes.size == 4 &&
+                        m.parameterTypes[0] == "Landroid/content/Context;" &&
+                        m.parameterTypes[1] == "I" &&
+                        m.parameterTypes[2] == "I" &&
+                        m.returnType == "I"
+                }
+                if (bMethod?.implementation != null) {
+                    bMethod.addInstructionsWithLabels(
+                        0,
+                        """
+                            const/4 v0, 0x3
+                            if-ne p1, v0, :cond_keep_cols
+                            const/4 p1, 0x4
+                            :cond_keep_cols
+                            nop
+                        """.trimIndent()
+                    )
                 }
             }
         }
@@ -1129,7 +1184,11 @@ val allowExternalMediaBrowserPatch = bytecodePatch(
  */
 private fun standardizeImageUrl(url: String, size: Int = 512): String {
     val base = url.substringBefore("=")
-    return "$base=w$size-h$size-l90-rj"
+    return when {
+        url.contains("play-lh.googleusercontent.com") -> "$base=w$size-h$size"
+        url.contains("googleusercontent.com") || url.contains("ggpht.com") -> "$base=w$size-h$size-l90-rj"
+        else -> url
+    }
 }
 
 /**
