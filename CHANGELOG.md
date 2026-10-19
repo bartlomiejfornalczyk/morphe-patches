@@ -1,3 +1,9 @@
+## [1.5.0-dev.2](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.5.0-dev.1...v1.5.0-dev.2) (2026-10-19)
+
+### ✨ New Features
+
+* standardize image UI and add 4x4 grid support ([2b95fdf](https://github.com/bartlomiejfornalczyk/morphe-patches/commit/2b95fdfb71929f1a9eff9bd9df856f59f591b62b))
+
 ## [1.5.0-dev.1](https://github.com/bartlomiejfornalczyk/morphe-patches/compare/v1.4.0...v1.5.0-dev.1) (2026-10-18)
 
 ### ✨ New Features
